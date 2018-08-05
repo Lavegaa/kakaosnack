@@ -1,7 +1,5 @@
 let gameWidth = window.innerWidth;
 let gameHeight = window.innerHeight;
-let titleWidth = gameWidth/5*4;
-let titleHeight = titleWidth;
 let player = {
   ID: undefined,
   T_HP: true,
@@ -22,20 +20,14 @@ let equip = {
     PART: "weapon",
     HP: 0,
     ATK: 0,
-    SPECIAL:''
+    SPECIAL:'None'
   },
   armor: {
     ID: undefined,
     PART: "armor",
     HP: 0,
     ATK: 0,
-    SPECIAL:''
-  },
-  status: {
-    ID: undefined,
-    PART: "status",
-    HP: 0,
-    ATK: 0,
+    SPECIAL:'None'
   },
   init: function() {
     this.weapon = {
@@ -43,20 +35,14 @@ let equip = {
       PART: "weapon",
       HP: 0,
       ATK: 0,
-      SPECIAL:''
+      SPECIAL:'None'
     },
     this.armor = {
       ID: undefined,
       PART: "armor",
       HP: 0,
       ATK: 0,
-      SPECIAL:''
-    },
-    this.status = {
-      ID: undefined,
-      PART: "status",
-      HP: 0,
-      ATK: 0,
+      SPECIAL:'None'
     }
   }
 };
@@ -68,7 +54,6 @@ let isStat = false;
 let isItem = false;
 let isClear = false;
 
-
 class IntroScene extends Phaser.Scene {
   constructor(config) {
     super({ key: 'intro' });
@@ -77,22 +62,34 @@ class IntroScene extends Phaser.Scene {
     this.load.image('bg','img/bg_intro.png');
     this.load.image('title','img/title.png');
     this.load.image('button','img/button.png');
+    this.load.image('UI','img/status.png');
   }
   create() {
-    //window.addEventListener('resize', resize);
-    //resize();
-
     //set bg & title
     this.add.image(gameWidth/2, gameHeight/2, 'bg').setDisplaySize(gameWidth, gameHeight);
-    this.add.image(gameWidth/2, gameHeight/4, 'title').setDisplaySize(titleWidth,titleHeight);
+    this.add.image(gameWidth/2, gameHeight/4, 'title').setDisplaySize(gameWidth*0.8,gameWidth*0.8);
+
+    //show ranking
+    let dataRank;
+    if (localStorage.rank) { dataRank = JSON.parse(localStorage.rank); }
+    let bgRank = this.add.image(gameWidth*0.5, gameHeight*0.5, 'UI').setDisplaySize(gameWidth*0.3, gameHeight*0.3).setAlpha(0.5);
+    let maxIndex = 0;
+    if (dataRank != undefined) {
+      if (dataRank.length > 5) { maxIndex = 5; }
+      else { maxIndex = dataRank.length; }
+    }
+    for (let i=0; i<maxIndex; i++) {
+      let txtRank = this.add.text(0, bgRank.y-bgRank.displayHeight/2+bgRank.displayHeight/6*i, (i+1)+"등: "+dataRank[i].stage+"-"+dataRank[i].level, { fontSize: bgRank.displayHeight/12, fontStyle: 'bold' }).setPadding({ top: bgRank.displayHeight/12 });
+      txtRank.x = bgRank.x - txtRank.width/2;
+    }
 
     //create button
-    let btnStart = this.add.image(gameWidth/7*2, gameHeight/6*5, 'button').setDisplaySize(gameWidth/3,gameWidth/6).setInteractive();
+    let btnStart = this.add.image(gameWidth/2, gameHeight*0.78, 'button').setDisplaySize(gameWidth/3,gameWidth/6).setInteractive();
     btnStart.name = 'start';
     let txtStart = this.add.text(0, 0, '게임시작', { fontSize: btnStart.displayHeight/3, fontStyle: 'bold'});
     txtStart.x = btnStart.x - txtStart.displayWidth/2;
     txtStart.y = btnStart.y - txtStart.displayHeight/2;
-    let btnHow = this.add.image(gameWidth/7*5, gameHeight/6*5, 'button').setDisplaySize(gameWidth/3,gameWidth/6).setInteractive();
+    let btnHow = this.add.image(gameWidth/2, gameHeight*0.9, 'button').setDisplaySize(gameWidth/3,gameWidth/6).setInteractive();
     btnHow.name = 'how';
     let txtHow = this.add.text(0, 0, '게임방법', { fontSize: btnStart.displayHeight/3, fontStyle: 'bold'});
     txtHow.x = btnHow.x - txtHow.displayWidth/2;
@@ -122,39 +119,39 @@ class ChooseCharacterScene extends Phaser.Scene {
   }
   preload() {
     //load images
-    this.load.image('char1','img/character1.png');
-    this.load.image('char2','img/character2.png');
-    this.load.image('char3','img/character3.png');
-    this.load.image('UI','img/status.png');
+    this.load.image('nav','img/nav_ch.png');
+    this.load.image('bgChar1','img/bg_character1.png');
+    this.load.image('bgChar2','img/bg_character2.png');
+    this.load.image('bgChar3','img/bg_character3.png');
+    this.load.image('HP','img/HP.png');
+    this.load.image('ATK','img/atk.png');
     this.load.image('left','img/left.png');
     this.load.image('right','img/right.png');
-    this.load.image('button', 'img/button.png');
   }
   create() {
     this.input.manager.enabled = true;
     //create character selection
-    let imgNav = this.add.image(gameWidth/2, gameHeight/16, 'UI').setDisplaySize(gameWidth, gameHeight/8);
-    let txtNav = this.add.text(imgNav.x-imgNav.displayWidth/2,imgNav.y-imgNav.displayHeight/2,'Choose your character', { fontSize: imgNav.displayHeight/3, fill: '#000' }).setPadding({ left: imgNav.displayWidth/20, top: imgNav.displayHeight/10 });
+    let imgNav = this.add.image(gameWidth/2, gameHeight/20, 'nav').setDisplaySize(gameWidth, gameHeight/10).setDepth(1);
 
     let now = 0;
     let charList = [
-      this.createCharacter(gameWidth/2, gameHeight/16*9, 1, 20, 6),
-      this.createCharacter(gameWidth/2, gameHeight/16*9, 2, 17, 8),
-      this.createCharacter(gameWidth/2, gameHeight/16*9, 3, 14, 10)
+      this.createCharacter(gameWidth/2, gameHeight/2, 1, 20, 6),
+      this.createCharacter(gameWidth/2, gameHeight/2, 2, 17, 8),
+      this.createCharacter(gameWidth/2, gameHeight/2, 3, 14, 10)
     ];
     charList[1].setVisible(false);
     charList[2].setVisible(false);
 
-    let btnLeft = this.add.image(gameWidth*0.1, gameHeight/16*9, 'left').setDisplaySize(gameWidth*0.2, gameWidth*0.2).setInteractive();
-    btnLeft.setName('left');
-    let btnRight = this.add.image(gameWidth*0.9, gameHeight/16*9, 'right').setDisplaySize(gameWidth*0.2, gameWidth*0.2).setInteractive();
-    btnRight.setName('right');
+    let btnLeft = this.add.image(gameWidth*0.1, gameHeight*0.15, 'left').setDisplaySize(gameHeight*0.1, gameHeight*0.1).setInteractive();
+    btnLeft.setName('left').setTintFill(0xffffff);
+    let btnRight = this.add.image(gameWidth*0.9, gameHeight*0.15, 'right').setDisplaySize(gameHeight*0.1, gameHeight*0.1).setInteractive();
+    btnRight.setName('right').setTintFill(0xffffff);
 
     this.input.on('gameobjectdown', function(pointer, button) {
       button.setTint(0x505050);
     });
     this.input.on('gameobjectup', function(pointer, button) {
-      button.clearTint();
+      button.setTintFill(0xffffff);
       switch (button.name) {
         case 'left':
           charList[now].setVisible(false);
@@ -169,6 +166,7 @@ class ChooseCharacterScene extends Phaser.Scene {
           charList[now].setVisible(true);
           break;
         default:
+          button.clearTint();
           player.ID = button.name;
           player.HP = button.getData('hp');
           player.ATK = button.getData('atk');
@@ -182,16 +180,15 @@ class ChooseCharacterScene extends Phaser.Scene {
 
   }
   createCharacter(x, y, id, hp, atk) {
-    let container = this.add.container(x,y).setSize(gameWidth*0.6,gameHeight*0.6).setDepth(id);
-    let bg = this.add.image(0, 0, 'UI').setDisplaySize(container.width,container.height);
-    let char = this.add.image(0, -container.height*0.2, 'char'+id).setDisplaySize(container.width,container.height*0.6);
-    let status = this.add.image(0, container.height*0.2, 'UI').setDisplaySize(container.width*0.8, container.height*0.2);
-    let txtStatus = this.add.text(-status.displayWidth/2, status.y-status.displayHeight/2, [
-      'HP: ' + hp,
-      'ATK: ' + atk
-    ], { fontSize: 12, fontStyle: 'bold', padding: 8 });
+    let container = this.add.container(x,y).setSize(gameWidth,gameHeight);
+    let bg = this.add.image(0, 0, 'bgChar'+id).setDisplaySize(container.width,container.height);
 
-    let btnSelect = this.add.image(0, container.height*0.38, 'button').setDisplaySize(container.width/3,container.width/6).setInteractive();
+    let imgHp = this.add.image(-container.width*0.4, -container.height*0.25, 'HP').setDisplaySize(container.height*0.05,container.height*0.05);
+    let txtHp = this.add.text(imgHp.x+imgHp.displayWidth, imgHp.y-imgHp.displayHeight/2, hp, { fontSize: imgHp.displayHeight, fontStyle: 'bold' });
+    let imgAtk = this.add.image(txtHp.x+txtHp.width*2, imgHp.y, 'ATK').setDisplaySize(container.height*0.05,container.height*0.05);
+    let txtAtk = this.add.text(imgAtk.x+imgAtk.displayWidth, txtHp.y, atk, { fontSize: imgAtk.displayHeight, fontStyle: 'bold' });
+
+    let btnSelect = this.add.image(0, -container.height*0.35, 'button').setDisplaySize(container.height*0.2,container.height*0.1).setInteractive();
     let txtSelect = this.add.text(0, 0, '선택', { fontSize: btnSelect.displayHeight/3, fontStyle: 'bold'});
     txtSelect.x = btnSelect.x - txtSelect.displayWidth/2;
     txtSelect.y = btnSelect.y - txtSelect.displayHeight/2;
@@ -199,7 +196,7 @@ class ChooseCharacterScene extends Phaser.Scene {
     btnSelect.setName(id);
     btnSelect.setData({ hp: hp, atk: atk });
 
-    container.add([bg, char, status, txtStatus, btnSelect, txtSelect]);
+    container.add([bg, imgHp, txtHp, imgAtk, txtAtk, btnSelect, txtSelect]);
 
     return container;
   }
@@ -211,93 +208,77 @@ class ChooseItemScene extends Phaser.Scene {
   }
   preload() {
     //load images
+    this.load.image('nav_item','img/nav_item.png');
+    this.load.image('nav_stage','img/nav_stage.png');
+    this.load.image('nav_coin','img/nav_coin.png');
+    this.load.image('bg_ch','img/bg_ch.png');
+    this.load.image('bg_stage','img/bg_stage.png');
+    this.load.image('bg_coin','img/bg_coin.png');
+    this.load.image('bg_status','img/bg_status.png');
     this.load.image('char1','img/character1.png');
     this.load.image('char2','img/character2.png');
     this.load.image('char3','img/character3.png');
-    this.load.image('UI','img/status.png');
-    this.load.image('inventory','img/inventory.png');
-    this.load.image('armor1','img/armor1.png');
-    this.load.image('armor2','img/armor2.png');
-    this.load.image('armor3','img/armor3.png');
-    this.load.image('armor4','img/armor4.png');
-    this.load.image('armor5','img/armor5.png');
-    this.load.image('armor6','img/armor6.png');
-    this.load.image('armor7','img/armor7.png');
-    this.load.image('armor8','img/armor8.png');
-    this.load.image('armor9','img/armor9.png');
-    this.load.image('armor10','img/armor10.png');
-    this.load.image('armor11','img/armor11.png');
-    this.load.image('weapon1','img/weapon1.png');
-    this.load.image('weapon2','img/weapon2.png');
-    this.load.image('weapon3','img/weapon3.png');
-    this.load.image('weapon4','img/weapon4.png');
-    this.load.image('weapon5','img/weapon5.png');
-    this.load.image('weapon6','img/weapon6.png');
-    this.load.image('weapon7','img/weapon7.png');
-    this.load.image('weapon8','img/weapon8.png');
-    this.load.image('weapon9','img/weapon9.png');
-    this.load.image('weapon10','img/weapon10.png');
-    this.load.image('weapon11','img/weapon11.png');
-    this.load.image('select','img/select.png')
+    this.load.image('redraw','img/redraw.png');
+    this.load.image('plate','img/plate.png');
+    this.load.image('weapon','img/weapon.png');
+    this.load.image('armor','img/armor.png');
+    for (let i=1; i<12; i++) { this.load.image('armor'+i,'img/armor/'+i+'.png'); }
+    for (let i=1; i<12; i++) { this.load.image('weapon'+i,'img/weapon/'+i+'.png'); }
+    this.load.image('Block','img/Block.png');
+    this.load.image('GetHP','img/GetHP.png');
+    this.load.image('DAttack','img/DAttack.png');
+    this.load.image('Evade','img/Evade.png');
     this.load.image('blank','img/blank.png');
-
-
-    this.load.audio('bell',['sound/bell.wav']);
-    this.load.audio('chooseitem',['sound/chooseitem.wav']);
-
   }
   create() {
+    //top nav part
+    let nav = this.add.container(gameWidth/2,gameHeight*0.1).setSize(gameWidth,gameHeight*0.2);
 
-    let bell = this.sound.add('bell',{
-      volume: 0.5
-    });
-    bell.play();
+    let imgNavbg = this.add.image(0, 0, 'nav_item').setDisplaySize(nav.width, nav.height);
 
-    let chooseitem = this.sound.add('chooseitem',{
-      volume: 0.5
-    });
-    chooseitem.play({loop:true});
+    let imgStage = this.add.image(0, nav.height*0.2, 'bg_stage').setDisplaySize(nav.height,nav.height*0.5);
+    imgStage.x = -nav.width/2 + imgStage.displayWidth/2;
+    let txtStage = this.add.text(0, 0, "stage: "+stage, { fontSize: imgStage.displayHeight/4, padding: imgStage.displayWidth*0.05,fontStyle: 'bold', fill: '#805252' });
+    txtStage.x = imgStage.x - txtStage.width/2;
+    txtStage.y = imgStage.y - txtStage.height/2;
 
+    let dataCoin;
+    if (localStorage.coin) { dataCoin = JSON.parse(localStorage.coin); }
+    else { dataCoin = 0; }
+    let txtCoin = this.add.text(0,-nav.height*0.4,""+dataCoin, { fontSize: nav.height*0.2, fontStyle: 'bold', fill: '#000' });
+    txtCoin.x = nav.width/2 - txtCoin.width - txtCoin.height;
+    let imgCoin = this.add.image(0, txtCoin.y+txtCoin.height/2, 'nav_coin').setDisplaySize(txtCoin.height*1.5, txtCoin.height);
+    imgCoin.x = txtCoin.x - imgCoin.displayWidth;
 
-    let nav = this.add.container(gameWidth/2,gameHeight*0.05).setSize(gameWidth,gameHeight*0.1);
-    let imgNavbg = this.add.image(0, 0, 'UI').setDisplaySize(nav.width, nav.height);
-    let txtNav = this.add.text(0, 0,'아이탬을 고르세요', { fontSize: nav.height*0.3, fill: '#000' }).setPadding({ left: nav.width/20 });
-    txtNav.x = -nav.width/2;
-    txtNav.y = -txtNav.height/2 - nav.height/6;
-    let txtNow = this.add.text(0, 0,'level: '+level+' stage : '+stage, { fontSize: nav.height*0.3, fill: '#000' }).setPadding({ left: nav.width/20 });
-    txtNow.x = -nav.width/2;
-    txtNow.y = -txtNow.height/2 + nav.height/6;
-    nav.add([imgNavbg,txtNav,txtNow]);
+    let btnRedraw = this.add.image(0, nav.height*0.2,'redraw').setDisplaySize(nav.height,nav.height*0.5).setInteractive().setName('redraw');
+    btnRedraw.x = nav.width/2 - btnRedraw.displayWidth/2;
+
+    nav.add([imgNavbg, imgStage, txtStage, txtCoin, imgCoin, btnRedraw]);
+
     //show chosen character & recent status
     let container = this.add.container(gameWidth/2,gameHeight*0.85).setSize(gameWidth,gameHeight*0.3);
-    let imgBg = this.add.image(0,0,'UI').setDisplaySize(container.width, container.height);
-    let imgChar = this.add.image(-container.width*0.35, 0,  'char'+player.ID).setDisplaySize(container.height,container.height);
-    let imgWeaponBg = this.add.image(-container.width*0.025, -container.height*0.2, 'inventory').setDisplaySize(container.height*0.5, container.height*0.5);
-    let imgArmorBg = this.add.image(container.width*0.325, -container.height*0.2, 'inventory').setDisplaySize(container.height*0.5, container.height*0.5);
-    let imgWeapon, imgArmor;
-    if (equip.weapon.ID != undefined) {
-      imgWeapon = this.add.image(-container.width*0.025, -container.height*0.2, 'weapon'+equip.weapon.ID).setDisplaySize(container.height*0.5, container.height*0.5);
-    } else {
-      imgWeapon = this.add.image(-container.width*0.025, -container.height*0.2, 'blank').setDisplaySize(container.height*0.5, container.height*0.5);
-    }
-    if (equip.armor.ID != undefined) {
-      imgArmor = this.add.image(container.width*0.325, -container.height*0.2, 'armor'+equip.armor.ID).setDisplaySize(container.height*0.5, container.height*0.5);
-    } else {
-      imgArmor = this.add.image(430, 250, 'blank').setDisplaySize(container.height*0.5, container.height*0.5);
-    }
-    let imgStatusBg = this.add.image(container.width*0.15, container.height*0.3, 'UI').setDisplaySize(container.width*0.7,container.height*0.4);
-    let playerStatus = {
-      HP: this.add.text(imgStatusBg.x-imgStatusBg.displayWidth/2, imgStatusBg.y-imgStatusBg.displayHeight/2, 'HP: '+player.HP, { fontSize: imgStatusBg.displayHeight/4, fontStyle: 'bold' }).setPadding({ left: 8, top: 8 }),
-      ATK: this.add.text(imgStatusBg.x-imgStatusBg.displayWidth/2, imgStatusBg.y-imgStatusBg.displayHeight/4, 'ATK: '+player.ATK, { fontSize: imgStatusBg.displayHeight/4, fontStyle: 'bold' }).setPadding({ left: 8, top: 8 })
-    }
-    container.add([imgBg,imgChar,imgWeaponBg,imgWeapon,imgArmorBg,imgArmor,imgStatusBg, playerStatus.HP, playerStatus.ATK]);
+
+    let imgCharBg = this.add.image(-container.width*0.35, 0, 'bg_ch').setDisplaySize(container.width*0.3, container.height);
+    let imgChar = this.add.image(imgCharBg.x, imgCharBg.y,  'char'+player.ID).setDisplaySize(container.width*0.26,container.height*0.9);
+
+    let eWeapon = this.createItem(-container.width*0.025, -container.height*0.5+container.width*0.175, container.width*0.36, container.width*0.35, equip.weapon);
+    let eArmor = this.createItem(container.width*0.325, -container.height*0.5+container.width*0.175, container.width*0.36, container.width*0.35, equip.armor);
+
+    let imgStatusBg = this.add.image(container.width*0.15, 0, 'bg_status').setDisplaySize(container.width*0.7,container.height-eWeapon.displayHeight+2);
+    imgStatusBg.y = eWeapon.y + eWeapon.displayHeight/2 + imgStatusBg.displayHeight/2 - 2;
+    let imgHP =  this.add.image(imgStatusBg.x-imgStatusBg.displayWidth*0.4, imgStatusBg.y, 'HP').setDisplaySize(imgStatusBg.displayHeight/2, imgStatusBg.displayHeight/2);
+    let HP = this.add.text(imgHP.x+imgHP.displayWidth, imgStatusBg.y-imgHP.displayHeight/2, player.HP, { fontSize: imgHP.displayHeight, fontStyle: 'bold' });
+    let imgATK = this.add.image(imgStatusBg.x+imgStatusBg.displayWidth*0.05, imgStatusBg.y, 'ATK').setDisplaySize(imgHP.displayHeight, imgHP.displayHeight);
+    let ATK = this.add.text(imgATK.x+imgATK.displayWidth, HP.y, player.ATK, { fontSize: HP.height, fontStyle: 'bold' });
+
+    container.add([imgCharBg, imgChar, eWeapon, eArmor, imgStatusBg, imgHP, HP, imgATK, ATK]);
 
     //create item selection
     let itemList = [
-      this.createItem(gameWidth/4, gameHeight*0.25, this.setRandom()),
-      this.createItem(gameWidth/4*3, gameHeight*0.25, this.setRandom()),
-      this.createItem(gameWidth/4, gameHeight*0.55, this.setRandom()),
-      this.createItem(gameWidth/4*3, gameHeight*0.55, this.setRandom())
+      this.createItem(gameWidth/4, gameHeight*0.325, gameWidth*0.5,gameHeight*0.25, this.setRandom()),
+      this.createItem(gameWidth/4*3, gameHeight*0.325, gameWidth*0.5,gameHeight*0.25, this.setRandom()),
+      this.createItem(gameWidth/4, gameHeight*0.575, gameWidth*0.5,gameHeight*0.25, this.setRandom()),
+      this.createItem(gameWidth/4*3, gameHeight*0.575, gameWidth*0.5,gameHeight*0.25, this.setRandom())
     ];
 
     this.input.on('gameobjectdown', function(pointer, gameObject) {
@@ -308,37 +289,37 @@ class ChooseItemScene extends Phaser.Scene {
         let itemATK = gameObject.getByName('btnPick').getData('atk');
 
         //initialize player status text
-        playerStatus.HP.setText('HP: ' + player.HP).clearTint();
-        playerStatus.ATK.setText('ATK: ' + player.ATK).clearTint();
+        HP.setText(player.HP).clearTint();
+        ATK.setText(player.ATK).clearTint();
 
         //show status change
         if (itemPART=='weapon') {
-          playerStatus.HP.setText('HP: ' + (player.HP-equip.weapon.HP+itemHP));
-          playerStatus.ATK.setText('ATK: ' + (player.ATK-equip.weapon.ATK+itemATK));
+          HP.setText(player.HP-equip.weapon.HP+itemHP);
+          ATK.setText(player.ATK-equip.weapon.ATK+itemATK);
 
           if (equip.weapon.HP<itemHP) {
-            playerStatus.HP.setTintFill(0x00ff00);
+            HP.setTintFill(0x00ff00);
           } else if (equip.weapon.HP>itemHP) {
-            playerStatus.HP.setTintFill(0xff0000);
+            HP.setTintFill(0xff0000);
           }
           if (equip.weapon.ATK<itemATK) {
-            playerStatus.ATK.setTintFill(0x00ff00);
+            ATK.setTintFill(0x00ff00);
           } else if (equip.weapon.ATK>itemATK) {
-            playerStatus.ATK.setTintFill(0xff0000);
+            ATK.setTintFill(0xff0000);
           }
         } else if (itemPART=='armor') {
-          playerStatus.HP.setText('HP: ' +  (player.HP-equip.armor.HP+itemHP));
-          playerStatus.ATK.setText('ATK: ' + (player.ATK-equip.armor.ATK+itemATK));
+          HP.setText(player.HP-equip.armor.HP+itemHP);
+          ATK.setText(player.ATK-equip.armor.ATK+itemATK);
 
           if (equip.armor.HP<itemHP) {
-            playerStatus.HP.setTintFill(0x00ff00);
+            HP.setTintFill(0x00ff00);
           } else if (equip.armor.HP>itemHP) {
-            playerStatus.HP.setTintFill(0xff0000);
+            HP.setTintFill(0xff0000);
           }
           if (equip.armor.ATK<itemATK) {
-            playerStatus.ATK.setTintFill(0x00ff00);
+            ATK.setTintFill(0x00ff00);
           } else if (equip.armor.ATK>itemATK) {
-            playerStatus.ATK.setTintFill(0xff0000);
+            ATK.setTintFill(0xff0000);
           }
         }
       } else {
@@ -355,8 +336,8 @@ class ChooseItemScene extends Phaser.Scene {
           gameObject.getByName('txtPick').setVisible(false);
           gameObject.getByName('imgItem').setVisible(true);
 
-          playerStatus.HP.setText('HP: ' + player.HP).clearTint();
-          playerStatus.ATK.setText('ATK: ' + player.ATK).clearTint();
+          HP.setText(player.HP).clearTint();
+          ATK.setText(player.ATK).clearTint();
 
         } else {
           //hide item image and show button & status change
@@ -374,6 +355,13 @@ class ChooseItemScene extends Phaser.Scene {
             }
           }
         }
+
+      }  else if (gameObject.name == 'redraw') {
+        gameObject.clearTint();
+        if (dataCoin >= 10) {
+          localStorage.coin = dataCoin - 10;
+          this.scene.restart();
+        } else { console.log("Need more coin"); }
 
       } else {
         //set tint to show it clearly
@@ -474,25 +462,30 @@ class ChooseItemScene extends Phaser.Scene {
     return item;
   }
 
-  createItem(x, y, item) {
-    let container = this.add.container(x,y).setSize(gameWidth*0.5,gameHeight*0.3);
-    let imgBg = this.add.image(0, 0, 'UI').setDisplaySize(container.width,container.height);
+  createItem(x, y, w, h, item) {
+    let container = this.add.container(x,y).setSize(w, h);
+    let imgBg = this.add.image(0, 0, 'plate').setDisplaySize(container.width*1.05,container.height*1.05);
     let imgItem;
-    if(itemNum<3 && itemNum!=0){
-       imgItem = this.add.image(0, -container.height*0.2, 'weapon'+item.ID).setDisplaySize(container.height*0.6,container.height*0.6).setName('imgItem');
-    }else{
-       imgItem = this.add.image(0, -container.height*0.2, 'armor'+item.ID).setDisplaySize(container.height*0.6,container.height*0.6).setName('imgItem');
+    if (item.ID == undefined) {
+      imgItem = this.add.image(0, -container.height*0.1, 'blank').setDisplaySize(container.height*0.6,container.height*0.6).setName('imgItem');
+    } else if(itemNum<3 && itemNum!=0){
+       imgItem = this.add.image(0, -container.height*0.1, 'weapon'+item.ID).setDisplaySize(container.height*0.6,container.height*0.6).setName('imgItem');
+    } else{
+       imgItem = this.add.image(0, -container.height*0.1, 'armor'+item.ID).setDisplaySize(container.height*0.6,container.height*0.6).setName('imgItem');
     }
-    let imgStatusBg = this.add.image(0, container.height*0.3, 'UI').setDisplaySize(container.width, container.height*0.4);
-    let txtStatus = this.add.text(-imgStatusBg.displayWidth/2, 0, [
-      'PART: ' + item.PART,
-      'HP: ' + item.HP,
-      'ATK: ' + item.ATK,
-      'SPECIAL: ' + item.SPECIAL
-    ], { fontSize: imgStatusBg.displayHeight/4, fontStyle: 'bold' }).setPadding({ left: 8 });
-    txtStatus.y = imgStatusBg.y - txtStatus.height/2;
+    let imgPart = this.add.image(-container.width*0.35, -container.height*0.35, ''+item.PART).setDisplaySize(container.height*0.2,container.height*0.2);
+    let imgHP = this.add.image(-container.width*0.3, container.height*0.32,'HP').setDisplaySize(container.height*0.13,container.height*0.13);
+    let txtHP = this.add.text(-container.width*0.2, container.height*0.27, item.HP , {fontSize : container.height*0.13});
+    let imgATK = this.add.image(container.width*0.1, container.height*0.32,'ATK').setDisplaySize(container.height*0.13,container.height*0.13);
+    let txtATK = this.add.text(container.width*0.22, container.height*0.27, item.ATK , {fontSize : container.height*0.13});
+    let imgSpc;
+    if (item.SPECIAL == 'None') {
+      imgSpc = this.add.image(container.width*0.4, -container.height*0.4, 'blank').setDisplaySize(container.height*0.25,container.height*0.25);
+    } else {
+      imgSpc = this.add.image(container.width*0.35, -container.height*0.35, ''+item.SPECIAL).setDisplaySize(container.height*0.25,container.height*0.25);
+    }
 
-    let btnSelect = this.add.image(0, -container.height*0.2, 'button').setDisplaySize(container.width/2,container.width/4).setInteractive();
+    let btnSelect = this.add.image(0, -container.height*0.1, 'button').setDisplaySize(container.width/2,container.width/4).setInteractive();
     btnSelect.setName('btnPick').setVisible(false);
     btnSelect.setData({ id: item.ID, part: item.PART, hp: item.HP, atk: item.ATK, special: item.SPECIAL });
     let txtSelect = this.add.text(0, 0, '선택', { fontSize: btnSelect.displayHeight/3, fontStyle: 'bold'});
@@ -500,7 +493,7 @@ class ChooseItemScene extends Phaser.Scene {
     txtSelect.y = btnSelect.y - txtSelect.displayHeight/2;
     txtSelect.setName('txtPick').setVisible(false);
 
-    container.add([imgBg, imgItem, imgStatusBg, txtStatus, btnSelect, txtSelect]);
+    container.add([imgBg, imgItem, imgPart, imgHP, txtHP, imgATK, txtATK, imgSpc, btnSelect, txtSelect]);
     container.setName('conPick').setData('pick', false).setInteractive();
 
     return container;
@@ -533,30 +526,18 @@ class FightScene extends Phaser.Scene {
     this.load.image('mhead2','img/mhead2.png');
     this.load.image('mhead3','img/mhead3.png');
     this.load.image('mhead0','img/mhead0.png');
-    this.load.image('ATK','img/ATK.png');
-    this.load.image('HP','img/HP.png');
     this.load.image('boss1','img/ryan1.png');
     this.load.image('boss2','img/ryan2.png');
     this.load.image('boss3','img/ryan3.png');
     this.load.image('boss4','img/ryan4.png');
-    this.load.image('UI', 'img/status.png');
-    this.load.image('inventory', 'img/inventory.png');
-    this.load.image('Wequip', 'img/weapon'+equip.weapon.ID+'.png');
-    this.load.image('Aequip', 'img/weapon'+equip.armor.ID+'.png');
-    this.load.image('blank','img/blank.png');
-    this.load.image('win', 'img/win.png');
-    this.load.image('lose', 'img/lose.png');
     this.load.image('button', 'img/button.png');
     this.load.image('background','img/background.png');
     this.load.image('plate','img/plate.png');
-    this.load.image('GetHP','img/GetHP.png');
-    this.load.image('Block','img/Block.png');
-    this.load.image('Dattack','img/Dattack.png');
-    this.load.image('Evade','img/Evade.png');
     this.load.image('potion0','img/potion0.png');
     this.load.image('potion1','img/potion1.png');
     this.load.image('potion2','img/potion2.png');
     this.load.image('stageplate','img/stageplate.png');
+    this.load.image('bg_gameover','img/bg_gameover.png');
 
     this.load.audio('pattack',['sound/pattack.wav']);
     this.load.audio('mattack1',['sound/mattack1.wav']);
@@ -567,7 +548,7 @@ class FightScene extends Phaser.Scene {
 
   create() {
     //create container
-    
+
     let bgm = this.sound.add('fight',{
       volume: 0.5
     });
@@ -579,18 +560,18 @@ class FightScene extends Phaser.Scene {
       this.playerHP = player.HP;
       player.T_HP = false;
     }
-    
+
     let playerbg = this.add.image(0, 0, 'background').setDisplaySize(playerBox.width, playerBox.height);
     this.HP = this.add.text(-playerBox.width*0.2,-playerBox.height*0.17, this.playerHP, { fontSize: playerBox.displayHeight*0.36, fill: '#000' });
     let CHEAD__img = this.add.image(-playerBox.width*0.4 ,0,'head'+player.ID).setDisplaySize(playerBox.height*0.8,playerBox.height*0.8);
     let HP__img = this.add.image(-playerBox.width*0.25, 0,'HP').setDisplaySize(playerBox.height*0.5,playerBox.height*0.5);
     let ATK = this.add.text(playerBox.width*0.05, -playerBox.height*0.17, player.ATK, { fontSize: playerBox.displayHeight*0.36, fill: '#000' });
     let ATK__img = this.add.image(0 ,0,'ATK').setDisplaySize(playerBox.height*0.5,playerBox.height*0.5);
-    let DATK__img = this.add.image(playerBox.width*0.3 ,0,'Dattack').setDisplaySize(playerBox.height*0.7,playerBox.height*0.7).setVisible(false);
+    let DATK__img = this.add.image(playerBox.width*0.3 ,0,'DAttack').setDisplaySize(playerBox.height*0.7,playerBox.height*0.7).setVisible(false);
     let GATK__img = this.add.image(playerBox.width*0.3 ,0,'GetHP').setDisplaySize(playerBox.height*0.7,playerBox.height*0.7).setVisible(false);
     let BARMOR__img = this.add.image(playerBox.width*0.4 ,0,'Block').setDisplaySize(playerBox.height*0.7,playerBox.height*0.7).setVisible(false);
     let EARMOR__img = this.add.image(playerBox.width*0.4 ,0,'Evade').setDisplaySize(playerBox.height*0.7,playerBox.height*0.7).setVisible(false);
-    this.WIN__text = this.add.text(0, -playerBox.height*0.2 ,'W    I    N',{fontSize:playerBox.height*0.4}).setVisible(false);    
+    this.WIN__text = this.add.text(0, -playerBox.height*0.2 , 'W    I    N', { fontSize:playerBox.height*0.4, fontStyle: 'bold' }).setVisible(false);
     this.WIN__img = this.add.image(0, 0, 'background').setDisplaySize(playerBox.width, playerBox.height).setVisible(false);
     this.WIN__text.x = this.WIN__img.x - this.WIN__text.width/2;
     playerBox.add([playerbg,this.HP,HP__img,CHEAD__img,ATK,ATK__img,DATK__img,GATK__img,BARMOR__img,EARMOR__img,this.WIN__img,this.WIN__text]);
@@ -657,7 +638,7 @@ class FightScene extends Phaser.Scene {
     this.M__HP = this.add.text(-monsterBox.width*0.2, -monsterBox.height*0.17,this.monster.HP, { fontSize:monsterBox.displayHeight*0.36 , fill: '#000' });
     let MATK__img = this.add.image(0, 0,'ATK').setDisplaySize(monsterBox.height*0.5,monsterBox.height*0.5);
     let M__ATK = this.add.text(monsterBox.width*0.05, -monsterBox.height*0.17, this.monster.ATK, { fontSize: monsterBox.displayHeight*0.36, fill: '#000' });
-    let MDATK__img = this.add.image(monsterBox.width*0.25 ,0,'Dattack').setDisplaySize(monsterBox.height*0.7,monsterBox.height*0.7).setVisible(false);
+    let MDATK__img = this.add.image(monsterBox.width*0.3 ,0,'DAttack').setDisplaySize(monsterBox.height*0.7,monsterBox.height*0.7).setVisible(false);
     let MGATK__img = this.add.image(monsterBox.width*0.25 ,0,'GetHP').setDisplaySize(monsterBox.height*0.7,monsterBox.height*0.7).setVisible(false);
     let MBARMOR__img = this.add.image(monsterBox.width*0.4 ,0,'Block').setDisplaySize(monsterBox.height*0.7,monsterBox.height*0.7).setVisible(false);
     let MEARMOR__img = this.add.image(monsterBox.width*0.4 ,0,'Evade').setDisplaySize(monsterBox.height*0.7,monsterBox.height*0.7).setVisible(false);
@@ -682,7 +663,7 @@ class FightScene extends Phaser.Scene {
     //fight event (per 1 second)
     this.fightEvent = this.time.addEvent({ delay: 600, callback: this.onEvent, callbackScope: this, loop: true });
 
-    
+
 
     this.input.on('gameobjectdown', function(pointer ,gameObject) {
       if(gameObject.name=='status'){
@@ -747,7 +728,7 @@ class FightScene extends Phaser.Scene {
     //fight with turn
     let lefthand = Math.floor(Math.random()*99);
     if (this.turn == 'p') {
-      
+
       if(isClear){
         this.stageClear(false);
         this.fightEvent.remove(false);
@@ -868,7 +849,7 @@ class FightScene extends Phaser.Scene {
           });
           mAttack__sound.play();
         }
-        
+
         if(equip.armor.SPECIAL == 'Block' && lefthand<50){
           if(this.playerHP + 2 > player.HP){
             this.playerHP = player.HP;
@@ -958,14 +939,59 @@ class FightScene extends Phaser.Scene {
       this.SELECT__text.setVisible(true);
     } else {
       console.log('Fail...');
-      let container = this.add.container(gameWidth*0.6, gameHeight/2).setSize(gameWidth/2, gameHeight/2);
-      let imgBg = this.add.image(0, 0, 'UI').setDisplaySize(container.width,container.height);
-      let imgLose = this.add.image(0, -container.height*0.3, 'lose').setDisplaySize(container.width,container.height*0.6);
-      let btnReplay = this.add.image(-container.width*0.2, container.height*0.3, 'button').setDisplaySize(container.width*0.3,container.width*0.15).setInteractive();
+      //storage process
+      if (typeof(Storage) !== undefined) {
+        //save record
+        let dataRank;
+        if (localStorage.rank) { dataRank = JSON.parse(localStorage.rank); }
+        let saveRank = { 'stage': stage, 'level': level };
+        if (dataRank != undefined) {
+          if (dataRank.length > 10) {
+            localStorage.clear();
+            dataRank = [];
+          }
+          dataRank.push(saveRank);
+          dataRank.sort( function(a,b) {
+            let diffStage = a.stage - b.stage;
+            if (diffStage != 0) { return diffStage; }
+            else {
+              let diffLevel = a.level - b.level;
+              if (diffLevel != 0) { return diffLevel; }
+              return ;
+            }
+          });
+          localStorage.rank = JSON.stringify(dataRank.reverse());
+          console.log(dataRank);
+        } else {
+          let arrRank = [];
+          arrRank.push(saveRank);
+          localStorage.rank = JSON.stringify(arrRank);
+        }
+
+        //add coin
+        let dataCoin;
+        if (localStorage.coin) { dataCoin = JSON.parse(localStorage.coin); }
+        else { dataCoin = 0; }
+        localStorage.coin = dataCoin + level;
+
+      } else {
+        console.log("Can't save record: No Web Storage support..");
+      }
+
+      //create lose interface
+      let container = this.add.container(gameWidth*0.5, gameHeight*0.5).setSize(gameWidth*0.7, gameHeight*0.5);
+      let imgBg = this.add.image(0, 0, 'bg_gameover').setDisplaySize(container.width,container.height);
+      let txtScore = this.add.text(0, container.height*0.1, "< "+stage+" - "+small_stage+" >", { fontSize: container.height*0.06, fontStyle: 'bold', fill: '#000' });
+      txtScore.x = -txtScore.width/2;
+      let txtCoin = this.add.text(0, txtScore.y+txtScore.height, ""+level, { fontSize: container.height*0.06, fontStyle: 'bold', fill: '#000' }).setPadding({ top: txtScore.height/2 });
+      let imgCoin = this.add.image(0, txtCoin.y+txtCoin.height/2, 'nav_coin').setDisplaySize(txtCoin.height*1.5, txtCoin.height);
+      txtCoin.x = -txtCoin.width/2 + imgCoin.displayWidth/2;
+      imgCoin.x = txtCoin.x - imgCoin.displayWidth/2;
+      let btnReplay = this.add.image(-container.width*0.23, container.height*0.35, 'button').setDisplaySize(container.width*0.4,container.width*0.2).setInteractive();
       let txtReplay = this.add.text(0, 0, '다시시작', { fontSize: btnReplay.displayHeight/3, fontStyle: 'bold' });
       txtReplay.x = btnReplay.x - txtReplay.width/2;
       txtReplay.y = btnReplay.y - txtReplay.height/2;
-      let btnExit = this.add.image(container.width*0.2, container.height*0.3, 'button').setDisplaySize(container.width*0.3,container.width*0.15).setInteractive();;
+      let btnExit = this.add.image(container.width*0.23, container.height*0.35, 'button').setDisplaySize(container.width*0.4,container.width*0.2).setInteractive();
       let txtExit = this.add.text(0, 0, '게임종료', { fontSize: btnExit.displayHeight/3, fontStyle: 'bold' });
       txtExit.x = btnExit.x - txtExit.width/2;
       txtExit.y = btnExit.y - txtExit.height/2;
@@ -973,7 +999,7 @@ class FightScene extends Phaser.Scene {
       btnReplay.name = 'replay';
       btnExit.name = 'exit';
 
-      container.add([imgBg, imgLose, btnReplay, txtReplay, btnExit, txtExit]);
+      container.add([imgBg, txtScore, txtCoin, imgCoin, btnReplay, txtReplay, btnExit, txtExit]);
     }
   }
 
