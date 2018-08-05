@@ -403,7 +403,7 @@ class ChooseItemScene extends Phaser.Scene {
       let special_key=Math.floor(Math.random()*2);
 
       if(itemNum < 2){
-        if(percent<70){
+        if(percent<90){
           ATK__item = Math.floor(Math.random()*2)+3*stage;
           part_what = "weapon";
         }else if(percent<20){
@@ -424,7 +424,7 @@ class ChooseItemScene extends Phaser.Scene {
           }
         }
       }else{
-        if(percent<70){
+        if(percent<90){
           HP__item = Math.floor(Math.random()*3)+8*stage;
           part_what = "armor";
         }else if(percent<20){
@@ -464,7 +464,7 @@ class ChooseItemScene extends Phaser.Scene {
     let container = this.add.container(x,y).setSize(gameWidth*0.5,gameHeight*0.3);
     let imgBg = this.add.image(0, 0, 'UI').setDisplaySize(container.width,container.height);
     let imgItem;
-    if(itemNum<3){
+    if(itemNum<3 && itemNum!=0){
        imgItem = this.add.image(0, -container.height*0.2, 'weapon'+item.ID).setDisplaySize(container.height*0.6,container.height*0.6).setName('imgItem');
     }else{
        imgItem = this.add.image(0, -container.height*0.2, 'armor'+item.ID).setDisplaySize(container.height*0.6,container.height*0.6).setName('imgItem');
@@ -509,9 +509,18 @@ class FightScene extends Phaser.Scene {
     this.load.image('char1','img/character1.png');
     this.load.image('char2','img/character2.png');
     this.load.image('char3','img/character3.png');
+    this.load.image('head1','img/head1.png');
+    this.load.image('head2','img/head2.png');
+    this.load.image('head3','img/head3.png');
     this.load.image('mon1','img/monster1.png');
     this.load.image('mon2','img/monster2.png');
     this.load.image('mon3','img/monster3.png');
+    this.load.image('mhead1','img/mhead1.png');
+    this.load.image('mhead2','img/mhead2.png');
+    this.load.image('mhead3','img/mhead3.png');
+    this.load.image('mhead0','img/mhead0.png');
+    this.load.image('ATK','img/ATK.png');
+    this.load.image('HP','img/HP.png');
     this.load.image('boss1','img/ryan1.png');
     this.load.image('boss2','img/ryan2.png');
     this.load.image('boss3','img/ryan3.png');
@@ -524,32 +533,57 @@ class FightScene extends Phaser.Scene {
     this.load.image('win', 'img/win.png');
     this.load.image('lose', 'img/lose.png');
     this.load.image('button', 'img/button.png');
+    this.load.audio('pattack',['sound/pattack.wav']);
+    this.load.audio('mattack1',['sound/mattack1.wav']);
+    this.load.audio('mattack2',['sound/mattack2.wav']);
+
   }
 
   create() {
     //create container
-    let container = this.add.container(gameWidth/2,gameHeight*0.85).setSize(gameWidth,gameHeight*0.3);
+    
+
+    let playerBox = this.add.container(gameWidth/2,gameHeight*0.95).setSize(gameWidth,gameHeight*0.1);
     //view status
     if(player.T_HP){
       this.playerHP = player.HP;
       player.T_HP = false;
     }
     
-    let status = this.add.image(0, 0, 'UI').setDisplaySize(gameWidth-10,gameHeight/4);
-    this.HP = this.add.text(-100, -60, 'HP: '+this.playerHP, { fontsize: '40px', fill: '#000' });
-    let ATK = this.add.text(-100, -20, 'ATK: '+player.ATK, { fontsize: '40px', fill: '#000' });
-
-    this.playerImg = this.add.sprite(100, 300, 'char'+player.ID).setDisplaySize(100,100);
-    if(level%4 == 0){
-      let ranBoss = Math.floor(Math.random()*4)+1;
-      this.monsterImg = this.add.sprite(300, 300, 'boss'+ranBoss).setDisplaySize(100,100);
-    }else{
-      this.monsterImg = this.add.sprite(300, 300, 'mon'+(level%4)).setDisplaySize(100,100);
+    let playerbg = this.add.image(0, 0, 'UI').setDisplaySize(playerBox.width, playerBox.height);
+    this.HP = this.add.text(-playerBox.width*0.2,-playerBox.height*0.17, this.playerHP, { fontSize: playerBox.displayHeight*0.36, fill: '#000' });
+    let CHEAD__img = this.add.image(-playerBox.width*0.4 ,0,'head'+player.ID).setDisplaySize(playerBox.height*0.8,playerBox.height*0.8);
+    let HP__img = this.add.image(-playerBox.width*0.25, 0,'HP').setDisplaySize(playerBox.height*0.5,playerBox.height*0.5);
+    let ATK = this.add.text(playerBox.width*0.05, -playerBox.height*0.17, player.ATK, { fontSize: playerBox.displayHeight*0.36, fill: '#000' });
+    let ATK__img = this.add.image(0 ,0,'ATK').setDisplaySize(playerBox.height*0.5,playerBox.height*0.5);
+    let DATK__img = this.add.image(playerBox.width*0.25 ,0,'ATK').setDisplaySize(playerBox.height*0.5,playerBox.height*0.5).setVisible(false);
+    let GATK__img = this.add.image(playerBox.width*0.25 ,0,'HP').setDisplaySize(playerBox.height*0.5,playerBox.height*0.5).setVisible(false);
+    let BARMOR__img = this.add.image(playerBox.width*0.4 ,0,'ATK').setDisplaySize(playerBox.height*0.5,playerBox.height*0.5).setVisible(false);
+    let EARMOR__img = this.add.image(playerBox.width*0.4 ,0,'HP').setDisplaySize(playerBox.height*0.5,playerBox.height*0.5).setVisible(false);
+    playerBox.add([playerbg,this.HP,HP__img,CHEAD__img,ATK,ATK__img,DATK__img,GATK__img,BARMOR__img,EARMOR__img]);
+    if(equip.weapon.SPECIAL == 'DAttack'){
+      DATK__img.setVisible(true);
+      GATK__img.setVisible(false);
+    }else if(equip.weapon.SPECIAL == 'GetHP'){
+      GATK__img.setVisible(true);
+      DATK__img.setVisible(false);
+    }
+    if(equip.armor.SPECIAL == 'Block'){
+      BARMOR__img.setVisible(true);
+      EARMOR__img.setVisible(false);
+    }else if(equip.armor.SPECIAL == 'Evade'){
+      EARMOR__img.setVisible(true);
+      BARMOR__img.setVisible(false);
     }
 
-    container.add(status);
-    container.add(this.HP);
-    container.add(ATK);
+    this.playerImg = this.add.sprite(gameWidth*0.2, gameHeight*0.5, 'char'+player.ID).setDisplaySize(gameWidth*0.3,gameHeight*0.5);
+    if(level%4 == 0){
+      let ranBoss = Math.floor(Math.random()*4)+1;
+      this.monsterImg = this.add.sprite(gameWidth*0.8, gameHeight*0.5, 'boss'+ranBoss).setDisplaySize(gameWidth*0.3,gameHeight*0.5);
+    }else{
+      this.monsterImg = this.add.sprite(gameWidth*0.8, gameHeight*0.5, 'mon'+(level%4)).setDisplaySize(gameWidth*0.3,gameHeight*0.5);
+    }
+
 
 //===============================================MONSTER=============================================================================
 
@@ -561,8 +595,8 @@ class FightScene extends Phaser.Scene {
     //monster's status
     if(level%4 == 0){
       let Boss_special = Math.floor(Math.random()*4);
-      this.monster.HP = (level*4) + (stage*4) + 15;
-      this.monster.ATK = (level) + (stage*8) + 1;
+      this.monster.HP = (level*5) + (stage*5) + 15;
+      this.monster.ATK = (level) + (stage*5) + 1;
       if(Boss_special == 0){
         this.monster.SPECIAL = 'DAttack';
       }else if(Boss_special == 1){
@@ -575,39 +609,62 @@ class FightScene extends Phaser.Scene {
 
     }else{
       this.monster.HP = (level*4) + 12;
-      this.monster.ATK = (level*1);
+      this.monster.ATK = (stage+2);
       this.monster.SPECIAL = 'None';
     }
 
     this.monsterHP = this.monster.HP;
-    this.M__HP = this.add.text(80, -60, 'M_HP: '+this.monster.HP, { fontsize: '40px', fill: '#000' });
-    let M__ATK = this.add.text(80, -20, 'M_ATK: '+this.monster.ATK, { fontsize: '40px', fill: '#000' });
-    container.add(this.M__HP);
-    container.add(M__ATK);
+    let monsterBox = this.add.container(gameWidth/2,gameHeight*0.05).setSize(gameWidth,gameHeight*0.1);
+    let monsterbg = this.add.image(0, 0, 'UI').setDisplaySize(monsterBox.width, monsterBox.height);
+    let MHEAD__img = this.add.image(-monsterBox.width*0.4, 0,'mhead'+(level%4)).setDisplaySize(playerBox.height*0.8,playerBox.height*0.8);
+    let MHP__img = this.add.image(-monsterBox.width*0.25, 0,'HP').setDisplaySize(monsterBox.height*0.5,monsterBox.height*0.5);
+    this.M__HP = this.add.text(-monsterBox.width*0.2, -monsterBox.height*0.17,this.monster.HP, { fontSize:monsterBox.displayHeight*0.36 , fill: '#000' });
+    let MATK__img = this.add.image(0, 0,'ATK').setDisplaySize(monsterBox.height*0.5,monsterBox.height*0.5);
+    let M__ATK = this.add.text(monsterBox.width*0.05, -monsterBox.height*0.17, this.monster.ATK, { fontSize: monsterBox.displayHeight*0.36, fill: '#000' });
+    let MDATK__img = this.add.image(monsterBox.width*0.25 ,0,'ATK').setDisplaySize(monsterBox.height*0.5,monsterBox.height*0.5).setVisible(false);
+    let MGATK__img = this.add.image(monsterBox.width*0.25 ,0,'HP').setDisplaySize(monsterBox.height*0.5,monsterBox.height*0.5).setVisible(false);
+    let MBARMOR__img = this.add.image(monsterBox.width*0.4 ,0,'ATK').setDisplaySize(monsterBox.height*0.5,monsterBox.height*0.5).setVisible(false);
+    let MEARMOR__img = this.add.image(monsterBox.width*0.4 ,0,'HP').setDisplaySize(monsterBox.height*0.5,monsterBox.height*0.5).setVisible(false);
+    monsterBox.add([monsterbg,MHP__img,MHEAD__img,MATK__img,this.M__HP,M__ATK,MDATK__img,MGATK__img,MBARMOR__img,MEARMOR__img]);
+
+    if(this.monster.SPECIAL == 'DAttack'){
+      MDATK__img.setVisible(true);
+      MGATK__img.setVisible(false);
+    }else if(this.monster.SPECIAL == 'GetHP'){
+      MGATK__img.setVisible(true);
+      MDATK__img.setVisible(false);
+    }else if(this.monster.SPECIAL == 'Block'){
+      MBARMOR__img.setVisible(true);
+      MEARMOR__img.setVisible(false);
+    }else if(this.monster.SPECIAL == 'Evade'){
+      MEARMOR__img.setVisible(true);
+      MBARMOR__img.setVisible(false);
+    }
 
     //fight event (per 1 second)
     this.fightEvent = this.time.addEvent({ delay: 600, callback: this.onEvent, callbackScope: this, loop: true });
 
-    this.input.on('gameobjectdown', function(pointer, button) {
-      button.setTint(0xf0f0f0);
-    });
+    
+
+    this.input.on('gameobjectdown', function(pointer ,gameObject) {
+      if(gameObject.name=='status'){
+        let status = {
+          HP: gameObject.getData('hp'),
+          ATK: gameObject.getData('atk'),
+        }
+        player.HP += status.HP;
+        this.playerHP += status.HP;
+        player.ATK += status.ATK;
+        this.scene.start('third');
+        level++;
+        small_stage++;
+        if(small_stage==5){
+          small_stage=1;
+        }
+      }
+    },this);
     this.input.on('gameobjectup', function(pointer, button) {
       switch (button.name) {
-        case 'status':
-          let status = {
-            HP: button.getData('hp'),
-            ATK: button.getData('atk'),
-          }
-          player.HP += status.HP;
-          this.playerHP += status.HP;
-          player.ATK += status.ATK;
-          this.scene.start('third');
-          level++;
-          small_stage++;
-          if(small_stage==5){
-            small_stage=1;
-          }
-          break;
         case 'replay':
           player.init();
           equip.init();
@@ -653,12 +710,24 @@ class FightScene extends Phaser.Scene {
 
       this.tweens.add({
         targets: this.playerImg,
-        x: 200,
-        duration: 35,
+        x: gameWidth*0.6,
+        duration: 75,
         ease: 'Power2',
         yoyo: true,
-        delay: 10
-    });
+        delay: 0
+      });
+      this.tweens.add({
+        targets: this.monsterImg,
+        x: gameWidth*0.83,
+        duration: 75,
+        ease: 'Power2',
+        yoyo: true,
+        delay: 0
+      });
+      let pAttack__sound = this.sound.add('pattack',{
+        volume: 0.5
+      });
+      pAttack__sound.play();
 
       if(equip.weapon.SPECIAL == 'DAttack' && lefthand<10){
         this.monster.HP -= player.ATK;
@@ -669,7 +738,7 @@ class FightScene extends Phaser.Scene {
         }else{
           this.playerHP += 2;
         }
-        this.HP.setText('HP: ' + this.playerHP).setTintFill(0x00ff00);
+        this.HP.setText(this.playerHP).setTintFill(0x00ff00);
         console.log('GetHP +2');
       }
 
@@ -684,7 +753,7 @@ class FightScene extends Phaser.Scene {
         this.monster.HP += player.ATK;
       }
 
-      this.M__HP.setText('M_HP: ' + this.monster.HP).setTintFill(0xff0000);
+      this.M__HP.setText(this.monster.HP).setTintFill(0xff0000);
       if (this.monster.HP<=0) {
         if(level%4 == 0){
           isItem = true;
@@ -713,12 +782,33 @@ class FightScene extends Phaser.Scene {
       }else{
         this.tweens.add({
           targets: this.monsterImg,
-          x: 200,
-          duration: 35,
+          x: gameWidth*0.4,
+          duration: 75,
           ease: 'Power2',
           yoyo: true,
           delay: 10
         });
+
+        this.tweens.add({
+          targets: this.playerImg,
+          x: gameWidth*0.17,
+          duration: 75,
+          ease: 'Power2',
+          yoyo: true,
+          delay: 10
+        });
+
+        if(level%4 == 0){
+          let mAttack__sound = this.sound.add('mattack2',{
+            volume: 0.5
+          });
+          mAttack__sound.play();
+        }else{
+          let mAttack__sound = this.sound.add('mattack1',{
+            volume: 0.5
+          });
+          mAttack__sound.play();
+        }
         
         if(equip.armor.SPECIAL == 'Block' && lefthand<50){
           if(this.playerHP + 2 > player.HP){
@@ -743,7 +833,7 @@ class FightScene extends Phaser.Scene {
           }
         }
 
-        this.HP.setText('HP: ' + this.playerHP).setTintFill(0xff0000);
+        this.HP.setText(this.playerHP).setTintFill(0xff0000);
         if (this.playerHP<=0) {
           this.stageClear(false);
           this.fightEvent.remove(false);
@@ -762,14 +852,14 @@ class FightScene extends Phaser.Scene {
 //=================================================STATUS======================================================
 
     if(ranStatus==0){
-      ATK__status = Math.floor(Math.random()*2)+1+stage;
+      ATK__status = Math.floor(Math.random()*2)+stage;
     }
     else if(ranStatus==1){
       HP__status = Math.floor(Math.random()*3)+1+stage;
     }
     else if(ranStatus==2){
       HP__status = Math.floor(Math.random()*2)+1+stage;
-      ATK__status = Math.floor(Math.random()*1)+1+stage;
+      ATK__status = Math.floor(Math.random()*1)+stage;
     }
     let status = {
       HP: HP__status,
@@ -780,34 +870,29 @@ class FightScene extends Phaser.Scene {
   }
 
   createStatus(x,y,status){
-    let container = this.add.container(x,y).setSize(gameWidth*0.5,gameHeight*0.3);
-    let imgBg = this.add.image(0, 0, 'UI').setDisplaySize(container.width,container.height);
-    let imgStatusBg = this.add.image(0, container.height*0.2, 'UI').setDisplaySize(container.width, container.height*0.5-container.width/6);
+    let statusBox = this.add.container(x,y).setSize(gameWidth*0.5,gameHeight*0.4);
+    let imgBg = this.add.image(0, 0, 'UI').setDisplaySize(statusBox.width,statusBox.height);
+    let imgStatusBg = this.add.image(0, statusBox.height*0.2, 'UI').setDisplaySize(statusBox.width, statusBox.height*0.5-statusBox.width/6);
     let txtStatus = this.add.text(-imgStatusBg.displayWidth/2, 0, [
       'HP: ' + status.HP,
       'ATK: ' + status.ATK,
     ], { fontSize: imgStatusBg.displayHeight/4, fontStyle: 'bold' }).setPadding({ left: 8 });
     txtStatus.y = imgStatusBg.y - txtStatus.height/2;
 
-    let btnSelect = this.add.image(0, container.height*0.38, 'button').setDisplaySize(container.width/3,container.width/6).setInteractive();
-    let txtSelect = this.add.text(0, 0, '선택', { fontSize: btnSelect.displayHeight/3, fontStyle: 'bold'});
-    txtSelect.x = btnSelect.x - txtSelect.displayWidth/2;
-    txtSelect.y = btnSelect.y - txtSelect.displayHeight/2;
+    statusBox.setName('status').setInteractive();
+    statusBox.setData({hp: status.HP, atk: status.ATK });
 
-    btnSelect.setName('status');
-    btnSelect.setData({hp: status.HP, atk: status.ATK });
+    statusBox.add([imgBg, imgStatusBg, txtStatus]);
 
-    container.add([imgBg, imgStatusBg, txtStatus, btnSelect, txtSelect]);
-
-    return container;
+    return statusBox;
   }
   //show ui when stage clear or fail
   stageClear(clear) {
     if (clear) {
-      this.createStatus(gameWidth/4, gameHeight*0.25, this.statRandom());
-      this.createStatus(gameWidth/4*3, gameHeight*0.25, this.statRandom());
-      this.createStatus(gameWidth/4, gameHeight*0.55, this.statRandom());
-      this.createStatus(gameWidth/4*3, gameHeight*0.55, this.statRandom());
+      this.createStatus(gameWidth/4, gameHeight*0.3, this.statRandom());
+      this.createStatus(gameWidth/4*3, gameHeight*0.3, this.statRandom());
+      this.createStatus(gameWidth/4, gameHeight*0.7, this.statRandom());
+      this.createStatus(gameWidth/4*3, gameHeight*0.7, this.statRandom());
     } else {
       console.log('Fail...');
       let container = this.add.container(gameWidth*0.6, gameHeight/2).setSize(gameWidth/2, gameHeight/2);
