@@ -1,4 +1,4 @@
-let gameWidth = window.innerWidth;
+﻿let gameWidth = window.innerWidth;
 let gameHeight = window.innerHeight;
 let player = {
   ID: undefined,
@@ -160,13 +160,13 @@ class IntroScene extends Phaser.Scene {
     this.load.image('potion2','img/potion2.png');
     this.load.image('stageplate','img/stageplate.png');
     this.load.image('bg_gameover','img/bg_gameover.png');
+    
     this.load.audio('character',['sound/character.wav']);
     this.load.audio('pick1',['sound/pick1.wav']);
     this.load.audio('pick2',['sound/pick2.wav']);
     this.load.audio('bell',['sound/bell.wav']);
     this.load.audio('chooseitem',['sound/chooseitem.wav']);
     this.load.audio('coin',['sound/coin.wav']);
-    this.load.audio('nenough',['sound/nenough.wav']);
     this.load.audio('pattack',['sound/pattack.wav']);
     this.load.audio('mattack1',['sound/mattack1.wav']);
     this.load.audio('mattack2',['sound/mattack2.wav']);
@@ -226,6 +226,7 @@ class ChooseCharacterScene extends Phaser.Scene {
     super({ key: 'first' });
   }
   preload() {
+
 
   }
   create() {
@@ -323,7 +324,7 @@ class ChooseItemScene extends Phaser.Scene {
     super( { key: 'second' } );
   }
   preload() {
-    
+
   }
   create() {
     let coin = this.sound.add('coin',{
@@ -1104,13 +1105,6 @@ let config = {
   width: gameWidth,
   height: gameHeight,
   backgroundColor: '#fff',
-  physics: {
-    default: 'arcade',
-    arcade: {
-      gravity: { y: 0 },
-      debug: false
-    }
-  },
   scene: [ IntroScene, ChooseCharacterScene, ChooseItemScene, FightScene ]
 };
 
