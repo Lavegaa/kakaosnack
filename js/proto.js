@@ -1,4 +1,4 @@
-let gameWidth = window.innerWidth;
+﻿let gameWidth = window.innerWidth;
 let gameHeight = window.innerHeight;
 let player = {
   ID: undefined,
@@ -59,10 +59,112 @@ class IntroScene extends Phaser.Scene {
     super({ key: 'intro' });
   }
   preload() {
+    var progressBox = this.add.graphics();
+    var progressBar = this.add.graphics();
+    progressBox.fillStyle(0x222222, 0.5);
+    progressBox.fillRect(gameWidth*0.15, gameHeight/2-25, gameWidth*0.7, 50);
+
+    var loadingText = this.make.text({
+        x: gameWidth / 2,
+        y: gameHeight / 2 - 50,
+        text: 'Loading...',
+        style: {
+            fontSize: 15,
+            fontStyle: 'bold',
+            fill: '#000000'
+        }
+    });
+    loadingText.setOrigin(0.5, 0.5);
+
+    var percentText = this.make.text({
+        x: gameWidth/2,
+        y: gameHeight/2,
+        text: '0%',
+        style: {
+            fontSize: 20,
+            fontStyle: 'bold',
+            fill: '#ffffff'
+        }
+    });
+    percentText.setOrigin(0.5, 0.5);
+
+    this.load.on('progress', function (value) {
+      percentText.setText(parseInt(value * 100) + '%');
+      progressBar.clear();
+      progressBar.fillStyle(0xFFCC00, 1);
+      progressBar.fillRect(gameWidth*0.15, gameHeight/2-25, gameWidth*0.7 * value, 50);
+    });
+
+    this.load.on('complete', function () {
+      progressBar.destroy();
+      progressBox.destroy();
+      loadingText.destroy();
+      percentText.destroy();
+    });
+
     this.load.image('bg','img/bg_intro.png');
     this.load.image('title','img/title.png');
     this.load.image('button','img/button.png');
     this.load.image('UI','img/status.png');
+    this.load.image('nav','img/nav_ch.png');
+    this.load.image('bgChar1','img/bg_character1.png');
+    this.load.image('bgChar2','img/bg_character2.png');
+    this.load.image('bgChar3','img/bg_character3.png');
+    this.load.image('HP','img/HP.png');
+    this.load.image('ATK','img/ATK.png');
+    this.load.image('left','img/left.png');
+    this.load.image('right','img/right.png');
+    this.load.image('nav_item','img/nav_item.png');
+    this.load.image('nav_stage','img/nav_stage.png');
+    this.load.image('nav_coin','img/nav_coin.png');
+    this.load.image('bg_ch','img/bg_ch.png');
+    this.load.image('bg_stage','img/bg_stage.png');
+    this.load.image('bg_coin','img/bg_coin.png');
+    this.load.image('bg_status','img/bg_status.png');
+    this.load.image('char1','img/character1.png');
+    this.load.image('char2','img/character2.png');
+    this.load.image('char3','img/character3.png');
+    this.load.image('redraw','img/redraw.png');
+    this.load.image('plate','img/plate.png');
+    this.load.image('weapon','img/weapon.png');
+    this.load.image('armor','img/armor.png');
+    for (let i=1; i<12; i++) { this.load.image('armor'+i,'img/armor/'+i+'.png'); }
+    for (let i=1; i<12; i++) { this.load.image('weapon'+i,'img/weapon/'+i+'.png'); }
+    this.load.image('Block','img/Block.png');
+    this.load.image('GetHP','img/GetHP.png');
+    this.load.image('DAttack','img/Dattack.png');
+    this.load.image('Evade','img/Evade.png');
+    this.load.image('blank','img/blank.png');
+    this.load.image('char1','img/character1.png');
+    this.load.image('char2','img/character2.png');
+    this.load.image('char3','img/character3.png');
+    this.load.image('head1','img/head1.png');
+    this.load.image('head2','img/head2.png');
+    this.load.image('head3','img/head3.png');
+    this.load.image('mon1','img/monster1.png');
+    this.load.image('mon2','img/monster2.png');
+    this.load.image('mon3','img/monster3.png');
+    this.load.image('mhead1','img/mhead1.png');
+    this.load.image('mhead2','img/mhead2.png');
+    this.load.image('mhead3','img/mhead3.png');
+    this.load.image('mhead0','img/mhead0.png');
+    this.load.image('boss1','img/ryan1.png');
+    this.load.image('boss2','img/ryan2.png');
+    this.load.image('boss3','img/ryan3.png');
+    this.load.image('boss4','img/ryan4.png');
+    this.load.image('button', 'img/button.png');
+    this.load.image('background','img/background.png');
+    this.load.image('plate','img/plate.png');
+    this.load.image('potion0','img/potion0.png');
+    this.load.image('potion1','img/potion1.png');
+    this.load.image('potion2','img/potion2.png');
+    this.load.image('stageplate','img/stageplate.png');
+    this.load.image('bg_gameover','img/bg_gameover.png');
+
+    this.load.audio('pattack',['sound/pattack.wav']);
+    this.load.audio('mattack1',['sound/mattack1.wav']);
+    this.load.audio('mattack2',['sound/mattack2.wav']);
+    this.load.audio('fight',['sound/fight.wav']);
   }
   create() {
     //set bg & title
@@ -119,14 +221,7 @@ class ChooseCharacterScene extends Phaser.Scene {
   }
   preload() {
     //load images
-    this.load.image('nav','img/nav_ch.png');
-    this.load.image('bgChar1','img/bg_character1.png');
-    this.load.image('bgChar2','img/bg_character2.png');
-    this.load.image('bgChar3','img/bg_character3.png');
-    this.load.image('HP','img/HP.png');
-    this.load.image('ATK','img/atk.png');
-    this.load.image('left','img/left.png');
-    this.load.image('right','img/right.png');
+
   }
   create() {
     this.input.manager.enabled = true;
@@ -208,27 +303,7 @@ class ChooseItemScene extends Phaser.Scene {
   }
   preload() {
     //load images
-    this.load.image('nav_item','img/nav_item.png');
-    this.load.image('nav_stage','img/nav_stage.png');
-    this.load.image('nav_coin','img/nav_coin.png');
-    this.load.image('bg_ch','img/bg_ch.png');
-    this.load.image('bg_stage','img/bg_stage.png');
-    this.load.image('bg_coin','img/bg_coin.png');
-    this.load.image('bg_status','img/bg_status.png');
-    this.load.image('char1','img/character1.png');
-    this.load.image('char2','img/character2.png');
-    this.load.image('char3','img/character3.png');
-    this.load.image('redraw','img/redraw.png');
-    this.load.image('plate','img/plate.png');
-    this.load.image('weapon','img/weapon.png');
-    this.load.image('armor','img/armor.png');
-    for (let i=1; i<12; i++) { this.load.image('armor'+i,'img/armor/'+i+'.png'); }
-    for (let i=1; i<12; i++) { this.load.image('weapon'+i,'img/weapon/'+i+'.png'); }
-    this.load.image('Block','img/Block.png');
-    this.load.image('GetHP','img/GetHP.png');
-    this.load.image('DAttack','img/DAttack.png');
-    this.load.image('Evade','img/Evade.png');
-    this.load.image('blank','img/blank.png');
+
   }
   create() {
     //top nav part
@@ -513,36 +588,7 @@ class FightScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image('char1','img/character1.png');
-    this.load.image('char2','img/character2.png');
-    this.load.image('char3','img/character3.png');
-    this.load.image('head1','img/head1.png');
-    this.load.image('head2','img/head2.png');
-    this.load.image('head3','img/head3.png');
-    this.load.image('mon1','img/monster1.png');
-    this.load.image('mon2','img/monster2.png');
-    this.load.image('mon3','img/monster3.png');
-    this.load.image('mhead1','img/mhead1.png');
-    this.load.image('mhead2','img/mhead2.png');
-    this.load.image('mhead3','img/mhead3.png');
-    this.load.image('mhead0','img/mhead0.png');
-    this.load.image('boss1','img/ryan1.png');
-    this.load.image('boss2','img/ryan2.png');
-    this.load.image('boss3','img/ryan3.png');
-    this.load.image('boss4','img/ryan4.png');
-    this.load.image('button', 'img/button.png');
-    this.load.image('background','img/background.png');
-    this.load.image('plate','img/plate.png');
-    this.load.image('potion0','img/potion0.png');
-    this.load.image('potion1','img/potion1.png');
-    this.load.image('potion2','img/potion2.png');
-    this.load.image('stageplate','img/stageplate.png');
-    this.load.image('bg_gameover','img/bg_gameover.png');
 
-    this.load.audio('pattack',['sound/pattack.wav']);
-    this.load.audio('mattack1',['sound/mattack1.wav']);
-    this.load.audio('mattack2',['sound/mattack2.wav']);
-    this.load.audio('fight',['sound/fight.wav']);
 
   }
 
@@ -1010,13 +1056,6 @@ let config = {
   width: gameWidth,
   height: gameHeight,
   backgroundColor: '#fff',
-  physics: {
-    default: 'arcade',
-    arcade: {
-      gravity: { y: 0 },
-      debug: false
-    }
-  },
   scene: [ IntroScene, ChooseCharacterScene, ChooseItemScene, FightScene ]
 };
 
