@@ -1,4 +1,4 @@
-let gameWidth = window.innerWidth;
+﻿let gameWidth = window.innerWidth;
 let gameHeight = window.innerHeight;
 let player = {
   ID: undefined,
