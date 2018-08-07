@@ -818,7 +818,6 @@ class FightScene extends Phaser.Scene {
       }
     },this);
     this.input.on('gameobjectup', function(pointer, button) {
-      this.bgm.destroy();
       switch (button.name) {
         case 'replay':
           player.init();
@@ -827,6 +826,7 @@ class FightScene extends Phaser.Scene {
           stage = 1;
           small_stage = 1;
           isStat = false;
+          this.bgm.stop();
           this.scene.start('first');
           break;
         case 'exit':
@@ -836,6 +836,7 @@ class FightScene extends Phaser.Scene {
           stage = 1;
           small_stage = 1;
           isStat = false;
+          this.bgm.stop();
           this.scene.start('intro');
           break;
       }
