@@ -137,9 +137,6 @@ class IntroScene extends Phaser.Scene {
     this.load.image('DAttack','img/Dattack.png');
     this.load.image('Evade','img/Evade.png');
     this.load.image('blank','img/blank.png');
-    this.load.image('char1','img/character1.png');
-    this.load.image('char2','img/character2.png');
-    this.load.image('char3','img/character3.png');
     this.load.image('head1','img/head1.png');
     this.load.image('head2','img/head2.png');
     this.load.image('head3','img/head3.png');
@@ -163,7 +160,6 @@ class IntroScene extends Phaser.Scene {
     this.load.image('stageplate','img/stageplate.png');
     this.load.image('bg_gameover','img/bg_gameover.png');
 
-    this.load.audio('character',['sound/character.wav']);
     this.load.audio('pick1',['sound/pick1.wav']);
     this.load.audio('pick2',['sound/pick2.wav']);
     this.load.audio('bell',['sound/bell.wav']);
@@ -284,11 +280,6 @@ class ChooseCharacterScene extends Phaser.Scene {
     super({ key: 'first' });
   }
   create() {
-    let character = this.sound.add('character',{
-      volume: 0.3
-    });
-    character.play();
-
     let pick1 = this.sound.add('pick1',{
       volume: 0.5
     });
@@ -340,8 +331,6 @@ class ChooseCharacterScene extends Phaser.Scene {
           player.HP = button.getData('hp');
           player.ATK = button.getData('atk');
           pick2.play();
-          character.stop();
-          console.log(player);
           //change scene
           this.scene.start('second');
           break;
@@ -429,12 +418,12 @@ class ChooseItemScene extends Phaser.Scene {
     let eWeapon = this.createItem(-container.width*0.025, -container.height*0.5+container.width*0.175, container.width*0.36, container.width*0.35, equip.weapon);
     let eArmor = this.createItem(container.width*0.325, -container.height*0.5+container.width*0.175, container.width*0.36, container.width*0.35, equip.armor);
 
-    let imgStatusBg = this.add.image(container.width*0.15, 0, 'bg_status').setDisplaySize(container.width*0.7,container.height-eWeapon.displayHeight+2);
-    imgStatusBg.y = eWeapon.y + eWeapon.displayHeight/2 + imgStatusBg.displayHeight/2 - 2;
+    let imgStatusBg = this.add.image(container.width*0.15, 0, 'bg_status').setDisplaySize(container.width*0.715,container.height-eWeapon.displayHeight+2);
+    imgStatusBg.y = eWeapon.y + eWeapon.displayHeight/2 + imgStatusBg.displayHeight/2;
     let imgHP =  this.add.image(imgStatusBg.x-imgStatusBg.displayWidth*0.4, imgStatusBg.y, 'HP').setDisplaySize(imgStatusBg.displayHeight/2, imgStatusBg.displayHeight/2);
-    let HP = this.add.text(imgHP.x+imgHP.displayWidth, imgStatusBg.y-imgHP.displayHeight/2, player.HP, { fontSize: imgHP.displayHeight, fontStyle: 'bold', fontFamily:'font1' });
+    let HP = this.add.text(imgHP.x+imgHP.displayWidth, imgStatusBg.y-imgHP.displayHeight/2, player.HP, { fontSize: imgHP.displayHeight*0.8, fontStyle: 'bold', fontFamily:'font1' });
     let imgATK = this.add.image(imgStatusBg.x+imgStatusBg.displayWidth*0.05, imgStatusBg.y, 'ATK').setDisplaySize(imgHP.displayHeight, imgHP.displayHeight);
-    let ATK = this.add.text(imgATK.x+imgATK.displayWidth, HP.y, player.ATK, { fontSize: HP.height, fontStyle: 'bold' , fontFamily:'font1'});
+    let ATK = this.add.text(imgATK.x+imgATK.displayWidth, HP.y, player.ATK, { fontSize: imgHP.displayHeight*0.8, fontStyle: 'bold' , fontFamily:'font1'});
 
     container.add([imgCharBg, imgChar, eWeapon, eArmor, imgStatusBg, imgHP, HP, imgATK, ATK]);
 
@@ -556,8 +545,6 @@ class ChooseItemScene extends Phaser.Scene {
             equip.armor = item;
             break;
         }
-        console.log("item: ", item);
-        console.log("equip: ", equip);
         //change scene with data(image and status)
         this.scene.start('third');
       }
@@ -575,42 +562,42 @@ class ChooseItemScene extends Phaser.Scene {
       let special_key=Math.floor(Math.random()*2);
 
       if(itemNum < 2){
-        if(percent<90){
-          ATK__item = Math.floor(Math.random()*2)+3*stage;
-          part_what = "weapon";
-        }else if(percent<20){
-          HP__item = Math.floor(Math.random()*3)+2*stage;
+        if(percent<20){
+          HP__item = Math.floor(Math.random()*2)+2*stage;
           ATK__item = Math.floor(Math.random()*2)+2*stage;
+          part_what = "weapon";
+        }else if(percent<90){
+          ATK__item = Math.floor(Math.random()*2)+3*stage;
           part_what = "weapon";
         }else{
           if(special_key==0){
-            HP__item = Math.floor(Math.random()*3)+4*stage;
-            ATK__item = Math.floor(Math.random()*2)+4*stage;
+            HP__item = Math.floor(Math.random()*3)+3*stage;
+            ATK__item = Math.floor(Math.random()*2)+2*stage;
             part_what = "weapon";
             special='DAttack';
           }else{
-            HP__item = Math.floor(Math.random()*3)+4*stage;
-            ATK__item = Math.floor(Math.random()*2)+4*stage;
+            HP__item = Math.floor(Math.random()*3)+3*stage;
+            ATK__item = Math.floor(Math.random()*2)+2*stage;
             part_what = "weapon";
             special='GetHP';
           }
         }
       }else{
-        if(percent<90){
-          HP__item = Math.floor(Math.random()*3)+8*stage;
-          part_what = "armor";
-        }else if(percent<20){
+        if(percent<20){
           HP__item = Math.floor(Math.random()*8*stage)+2;
           ATK__item = Math.floor(Math.random()*2*stage)+1;
           part_what = "armor";
+        }else if(percent<90){
+          HP__item = Math.floor(Math.random()*3)+8*stage;
+          part_what = "armor";
         }else{
           if(special_key==0){
-            HP__item = Math.floor(Math.random()*3)+10*stage;
+            HP__item = Math.floor(Math.random()*3)+8*stage;
             ATK__item = Math.floor(Math.random()*2)+2*stage;
             part_what = "armor";
             special='Block';
           }else{
-            HP__item = Math.floor(Math.random()*3)+10*stage;
+            HP__item = Math.floor(Math.random()*3)+8*stage;
             ATK__item = Math.floor(Math.random()*2)+2*stage;
             part_what = "armor";
             special='Evade';
@@ -638,9 +625,9 @@ class ChooseItemScene extends Phaser.Scene {
     let imgItem;
     if (item.ID == undefined) {
       imgItem = this.add.image(0, -container.height*0.1, 'blank').setDisplaySize(container.height*0.6,container.height*0.6).setName('imgItem');
-    } else if(itemNum<3 && itemNum!=0){
+    } else if(itemNum<3 && itemNum!=0) {
        imgItem = this.add.image(0, -container.height*0.1, 'weapon'+item.ID).setDisplaySize(container.height*0.6,container.height*0.6).setName('imgItem');
-    } else{
+    } else {
        imgItem = this.add.image(0, -container.height*0.1, 'armor'+item.ID).setDisplaySize(container.height*0.6,container.height*0.6).setName('imgItem');
     }
     let imgPart = this.add.image(-container.width*0.35, -container.height*0.35, ''+item.PART).setDisplaySize(container.height*0.2,container.height*0.2);
@@ -727,15 +714,21 @@ class FightScene extends Phaser.Scene {
       BARMOR__img.setVisible(false);
     }
 
-    this.playerImg = this.add.sprite(gameWidth*0.2, gameHeight*0.5, 'char'+player.ID).setDisplaySize(gameWidth*0.25,gameHeight*0.4);
+    this.playerImg = this.add.sprite(gameWidth*0.2, gameHeight*0.5, 'char'+player.ID);
+    this.playerImg.setScale(gameWidth*0.45/this.playerImg.height);
     if(level%4 == 0){
       let ranBoss = Math.floor(Math.random()*4)+1;
-      this.monsterImg = this.add.sprite(gameWidth*0.8, gameHeight*0.5, 'boss'+ranBoss).setDisplaySize(gameWidth*0.25,gameHeight*0.4);
+      this.monsterImg = this.add.sprite(gameWidth*0.8, gameHeight*0.5, 'boss'+ranBoss);
+      this.monsterImg.setScale(gameWidth*0.45/this.monsterImg.height);
     }else if(level%4 == 2){
-      this.monsterImg = this.add.sprite(gameWidth*0.8, gameHeight*0.63, 'mon'+(level%4)).setDisplaySize(gameWidth*0.08,gameHeight*0.12);
+      this.monsterImg = this.add.sprite(gameWidth*0.8, gameHeight*0.55, 'mon'+(level%4));
+      this.monsterImg.setScale(gameWidth*0.2/this.monsterImg.height);
     }else{
-      this.monsterImg = this.add.sprite(gameWidth*0.8, gameHeight*0.5, 'mon'+(level%4)).setDisplaySize(gameWidth*0.25,gameHeight*0.4);
+      this.monsterImg = this.add.sprite(gameWidth*0.8, gameHeight*0.5, 'mon'+(level%4));
+      this.monsterImg.setScale(gameWidth*0.45/this.monsterImg.height);
     }
+
+
     this.stageplate = this.add.image(gameWidth*0.12,gameHeight*0.15,'stageplate').setDisplaySize(gameWidth*0.22,gameWidth*0.22);
     this.STAGE__text = this.add.text(gameWidth*0.06,gameHeight*0.135,stage+'-'+small_stage,{fontSize:gameHeight*0.05, fill:'#000', fontFamily:'font1'});
 
@@ -748,24 +741,24 @@ class FightScene extends Phaser.Scene {
     }
     //monster's status
     if(level%4 == 0){
-      let Boss_special = Math.floor(Math.random()*4);
-      this.monster.HP = (level*5) + (stage*5) + 15;
-      this.monster.ATK = (level) + (stage*5) + 1;
-      if(Boss_special == 0){
-        this.monster.SPECIAL = 'DAttack';
-      }else if(Boss_special == 1){
-        this.monster.SPECIAL = 'GetHP';
-      }else if(Boss_special == 2){
-        this.monster.SPECIAL='Block';
-      }else if(Boss_special == 3){
-        this.monster.SPECIAL='Evade';
-      }
-
-    }else{
-      this.monster.HP = (level*4) + 12;
-      this.monster.ATK = (stage+2);
-      this.monster.SPECIAL = 'None';
+    let Boss_special = Math.floor(Math.random()*4);
+    this.monster.HP = (level*5) + (stage*8) + 5;
+    this.monster.ATK = (level) + (stage*2) ;
+    if(Boss_special == 0){
+      this.monster.SPECIAL = 'DAttack';
+    }else if(Boss_special == 1){
+      this.monster.SPECIAL = 'GetHP';
+    }else if(Boss_special == 2){
+      this.monster.SPECIAL='Block';
+    }else if(Boss_special == 3){
+      this.monster.SPECIAL='Evade';
     }
+
+  }else{
+    this.monster.HP = (level*3) + 12;
+    this.monster.ATK = (stage+2);
+    this.monster.SPECIAL = 'None';
+  }
 
     this.monsterHP = this.monster.HP;
     let monsterBox = this.add.container(gameWidth/2,gameHeight*0.05).setSize(gameWidth,gameHeight*0.1);
@@ -801,8 +794,6 @@ class FightScene extends Phaser.Scene {
 
     //fight event (per 1 second)
     this.fightEvent = this.time.addEvent({ delay: 600, callback: this.onEvent, callbackScope: this, loop: true });
-
-
 
     this.input.on('gameobjectdown', function(pointer ,gameObject) {
       if(gameObject.name=='status'){
@@ -903,7 +894,6 @@ class FightScene extends Phaser.Scene {
 
         if(equip.weapon.SPECIAL == 'DAttack' && lefthand<10){
           this.monster.HP -= player.ATK;
-          console.log('DoubleAttack!');
         }else if(equip.weapon.SPECIAL == 'GetHP' && lefthand<50){
           if(this.playerHP + 2 > player.HP){
             this.playerHP = player.HP;
@@ -911,7 +901,6 @@ class FightScene extends Phaser.Scene {
             this.playerHP += 2;
           }
           this.HP.setText(this.playerHP).setTintFill(0x00ff00);
-          console.log('GetHP +2');
         }
 
         this.monster.HP -= player.ATK;
@@ -996,10 +985,8 @@ class FightScene extends Phaser.Scene {
           }else{
             this.playerHP += 2;
           }
-          console.log('Block!');
         }else if(equip.armor.SPECIAL == 'Evade' && lefthand<20){
           this.playerHP += this.monster.ATK;
-          console.log('Evade!');
         }
 
         this.playerHP -= this.monster.ATK;
@@ -1027,24 +1014,27 @@ class FightScene extends Phaser.Scene {
   statRandom(){
     let ATK__status = 0;
     let HP__status = 0;
-    let ranStatus = Math.floor(Math.random()*3);
+    let ranStatus = Math.floor(Math.random()*99);
+    let potion = 0
 
-//=================================================STATUS======================================================
-
-    if(ranStatus==0){
+    if(ranStatus<45){
       ATK__status = Math.floor(Math.random()*2)+stage;
+      potion = 0;
     }
-    else if(ranStatus==1){
-      HP__status = Math.floor(Math.random()*3)+1+stage;
+    else if(ranStatus<90){
+      HP__status = Math.floor(Math.random()*2)+2+stage;
+      potion = 1;
     }
-    else if(ranStatus==2){
-      HP__status = Math.floor(Math.random()*2)+1+stage;
+    else if(ranStatus<100){
+      HP__status = Math.floor(Math.random()*2)+stage;
       ATK__status = Math.floor(Math.random()*1)+stage;
+      potion = 2
     }
+
     let status = {
       HP: HP__status,
       ATK: ATK__status,
-      random: ranStatus
+      random: potion
     }
 
     return status;
@@ -1078,7 +1068,6 @@ class FightScene extends Phaser.Scene {
       this.SELECT__img.setVisible(true);
       this.SELECT__text.setVisible(true);
     } else {
-      console.log('Fail...');
       //storage process
       if (typeof(Storage) !== undefined) {
         //save record
@@ -1101,7 +1090,7 @@ class FightScene extends Phaser.Scene {
             }
           });
           localStorage.rank = JSON.stringify(dataRank.reverse());
-          console.log(dataRank);
+
         } else {
           let arrRank = [];
           arrRank.push(saveRank);
