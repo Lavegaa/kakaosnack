@@ -165,6 +165,7 @@ class IntroScene extends Phaser.Scene {
     this.load.audio('bell',['sound/bell.wav']);
     this.load.audio('chooseitem',['sound/chooseitem.wav']);
     this.load.audio('coin',['sound/coin.wav']);
+    this.load.audio('nenough',['sound/nenough.wav']);
     this.load.audio('pattack',['sound/pattack.wav']);
     this.load.audio('mattack1',['sound/mattack1.wav']);
     this.load.audio('mattack2',['sound/mattack2.wav']);
@@ -415,7 +416,9 @@ class ChooseItemScene extends Phaser.Scene {
     let imgCharBg = this.add.image(-container.width*0.35, 0, 'bg_ch').setDisplaySize(container.width*0.3, container.height);
     let imgChar = this.add.image(imgCharBg.x, imgCharBg.y,  'char'+player.ID).setDisplaySize(container.width*0.26,container.height*0.9);
 
+    itemNum = 1;
     let eWeapon = this.createItem(-container.width*0.025, -container.height*0.5+container.width*0.175, container.width*0.36, container.width*0.35, equip.weapon);
+    itemNum = 3;
     let eArmor = this.createItem(container.width*0.325, -container.height*0.5+container.width*0.175, container.width*0.36, container.width*0.35, equip.armor);
 
     let imgStatusBg = this.add.image(container.width*0.15, 0, 'bg_status').setDisplaySize(container.width*0.715,container.height-eWeapon.displayHeight+2);
@@ -428,6 +431,7 @@ class ChooseItemScene extends Phaser.Scene {
     container.add([imgCharBg, imgChar, eWeapon, eArmor, imgStatusBg, imgHP, HP, imgATK, ATK]);
 
     //create item selection
+    itemNum = 0;
     let itemList = [
       this.createItem(gameWidth/4, gameHeight*0.325, gameWidth*0.5,gameHeight*0.25, this.setRandom()),
       this.createItem(gameWidth/4*3, gameHeight*0.325, gameWidth*0.5,gameHeight*0.25, this.setRandom()),
@@ -670,10 +674,10 @@ class FightScene extends Phaser.Scene {
 
   create() {
 
-    let bgm = this.sound.add('fight',{
+    this.bgm = this.sound.add('fight',{
       volume: 0.5
     });
-    bgm.play({loop:true});
+    this.bgm.play({loop:true});
 
     //create container
     let playerBox = this.add.container(gameWidth/2,gameHeight*0.95).setSize(gameWidth,gameHeight*0.1);
@@ -804,16 +808,17 @@ class FightScene extends Phaser.Scene {
         player.HP += status.HP;
         this.playerHP += status.HP;
         player.ATK += status.ATK;
+        this.bgm.stop();
         this.scene.start('third');
         level++;
         small_stage++;
         if(small_stage==5){
           small_stage=1;
         }
-        bgm.stop();
       }
     },this);
     this.input.on('gameobjectup', function(pointer, button) {
+      this.bgm.destroy();
       switch (button.name) {
         case 'replay':
           player.init();
@@ -823,7 +828,6 @@ class FightScene extends Phaser.Scene {
           small_stage = 1;
           isStat = false;
           this.scene.start('first');
-          bgm.stop();
           break;
         case 'exit':
           player.init();
@@ -833,7 +837,6 @@ class FightScene extends Phaser.Scene {
           small_stage = 1;
           isStat = false;
           this.scene.start('intro');
-          bgm.stop();
           break;
       }
     }, this);
@@ -945,6 +948,7 @@ class FightScene extends Phaser.Scene {
         }
         this.playerHP = player.HP;
         player.T_HP = true;
+        this.bgm.stop();
         this.scene.start('second');
         this.fightEvent.remove(false);
         isItem = false;
