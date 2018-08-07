@@ -104,6 +104,8 @@ class IntroScene extends Phaser.Scene {
 
     this.load.image('bg','img/bg_intro.png');
     this.load.image('title','img/title.png');
+    for (let i=1; i<5; i++) { this.load.image('how'+i,'img/howto/'+i+'.png'); }
+    this.load.image('exit','img/exit.png');
     this.load.image('button','img/button.png');
     this.load.image('UI','img/status.png');
     this.load.image('nav','img/nav_ch.png');
@@ -176,33 +178,40 @@ class IntroScene extends Phaser.Scene {
   create() {
     //set bg & title
     this.add.image(gameWidth/2, gameHeight/2, 'bg').setDisplaySize(gameWidth, gameHeight);
-    this.add.image(gameWidth/2, gameHeight/4, 'title').setDisplaySize(gameWidth*0.8,gameWidth*0.8);
+    this.add.image(gameWidth/2, gameHeight/6, 'title').setScale(0.2);
 
     //show ranking
     let dataRank;
     if (localStorage.rank) { dataRank = JSON.parse(localStorage.rank); }
     let bgRank = this.add.image(gameWidth*0.5, gameHeight*0.5, 'UI').setDisplaySize(gameWidth*0.3, gameHeight*0.3).setAlpha(0.5);
+    let txtRank = this.add.text(0, bgRank.y-bgRank.displayHeight*0.45, "랭킹", { fontSize: bgRank.displayHeight*0.1, fontStyle: 'bold' });
+    txtRank.x = bgRank.x - txtRank.width/2;
     let maxIndex = 0;
     if (dataRank != undefined) {
       if (dataRank.length > 5) { maxIndex = 5; }
       else { maxIndex = dataRank.length; }
     }
     for (let i=0; i<maxIndex; i++) {
-      let txtRank = this.add.text(0, bgRank.y-bgRank.displayHeight/2+bgRank.displayHeight/6*i, (i+1)+"등: "+dataRank[i].stage+"-"+dataRank[i].level, { fontSize: bgRank.displayHeight/12, fontStyle: 'bold' }).setPadding({ top: bgRank.displayHeight/12 });
-      txtRank.x = bgRank.x - txtRank.width/2;
+      let txtNth = this.add.text(0, txtRank.y+txtRank.height*1.5+bgRank.displayHeight*0.15*i, (i+1)+"등: "+dataRank[i].stage+"-"+dataRank[i].level, { fontSize: bgRank.displayHeight*0.07, fontStyle: 'bold' }).setPadding({ top: bgRank.displayHeight*0.03 });
+      txtNth.x = bgRank.x - txtNth.width/2;
     }
 
     //create button
     let btnStart = this.add.image(gameWidth/2, gameHeight*0.78, 'button').setDisplaySize(gameWidth/3,gameWidth/6).setInteractive();
     btnStart.name = 'start';
-    let txtStart = this.add.text(0, 0, '게임시작', { fontSize: btnStart.displayHeight/3, fontStyle: 'bold', fontFamily:'font1'});
+    let txtStart = this.add.text(0, 0, '게임시작', { fontSize: btnStart.displayHeight/3, fontStyle: 'bold'});
     txtStart.x = btnStart.x - txtStart.displayWidth/2;
     txtStart.y = btnStart.y - txtStart.displayHeight/2;
+
     let btnHow = this.add.image(gameWidth/2, gameHeight*0.9, 'button').setDisplaySize(gameWidth/3,gameWidth/6).setInteractive();
     btnHow.name = 'how';
-    let txtHow = this.add.text(0, 0, '게임방법', { fontSize: btnStart.displayHeight/3, fontStyle: 'bold', fontFamily:'font1'});
+    let txtHow = this.add.text(0, 0, '게임방법', { fontSize: btnStart.displayHeight/3, fontStyle: 'bold'});
     txtHow.x = btnHow.x - txtHow.displayWidth/2;
     txtHow.y = btnHow.y - txtHow.displayHeight/2;
+
+    let conHow = this.howTo();
+    let pick1 = this.sound.add('pick1',{volume: 0.5});
+    let now = 1;
 
     //input handler(buttons)
     this.input.on('gameobjectdown', function(pointer, button) {
@@ -210,15 +219,64 @@ class IntroScene extends Phaser.Scene {
     });
     this.input.on('gameobjectup', function(pointer, button) {
       button.clearTint();
+      pick1.play();
       switch (button.name) {
         case 'start':
           this.scene.start('first');
           break;
         case 'how':
-          player.init();
+          if (conHow.visible) { conHow.setVisible(false); now = 1; }
+          else { conHow.setVisible(true); }
+          break;
+        case 'left':
+          button.setTintFill(0xFFCC00);
+          conHow.getByName(now).setVisible(false);
+          if (now == 1) { now = 4; }
+          else { now--; }
+          conHow.getByName(now).setVisible(true);
+          break;
+        case 'right':
+          button.setTintFill(0xFFCC00);
+          conHow.getByName(now).setVisible(false);
+          if (now == 4) { now = 1; }
+          else { now++; }
+          conHow.getByName(now).setVisible(true);
+          break;
+        case 'close':
+          now = 1;
+          conHow.setVisible(false);
           break;
       }
     }, this);
+  }
+  howTo() {
+    let container = this.add.container(gameWidth*0.5, gameHeight*0.5).setSize(gameWidth*0.8, gameHeight*0.7);
+    let bg = this.add.image(0, 0, 'bg_ch').setDisplaySize(container.width, container.height);
+
+    let imgHow = [
+      this.add.image(0, 0, 'how1').setDisplaySize(container.width, container.height).setVisible(true).setName(1),
+      this.add.image(0, 0, 'how2').setDisplaySize(container.width, container.height).setVisible(false).setName(2),
+      this.add.image(0, 0, 'how3').setDisplaySize(container.width, container.height).setVisible(false).setName(3),
+      this.add.image(0, 0, 'how4').setDisplaySize(container.width, container.height).setVisible(false).setName(4)
+    ];
+
+    let btnLeft = this.add.image(0, 0, 'left').setDisplaySize(container.height*0.1, container.height*0.1).setInteractive();
+    btnLeft.setName('left').setTintFill(0xFFCC00);
+    let btnRight = this.add.image(0, 0, 'right').setDisplaySize(container.height*0.1, container.height*0.1).setInteractive();
+    btnRight.setName('right').setTintFill(0xFFCC00);
+    btnLeft.x = -container.width/2 + btnLeft.displayWidth/2;
+    btnLeft.y = -container.height/2 + btnLeft.displayHeight/2;
+    btnRight.x = container.width/2 - btnRight.displayWidth/2;
+    btnRight.y = btnLeft.y;
+
+    let btnClose = this.add.image(0, 0, 'exit').setDisplaySize(container.height*0.1, container.height*0.1);
+    btnClose.setName('close').setInteractive();
+    btnClose.x = container.width/2 - btnClose.displayWidth/2;
+    btnClose.y = -container.height/2 - btnClose.displayHeight/2;
+
+    container.add([bg, imgHow[0], imgHow[1], imgHow[2], imgHow[3], btnLeft, btnRight, btnClose]);
+    container.setVisible(false);
+    return container;
   }
 }
 
@@ -226,15 +284,7 @@ class ChooseCharacterScene extends Phaser.Scene {
   constructor(config) {
     super({ key: 'first' });
   }
-  preload() {
-<<<<<<< HEAD
-    //load images
-=======
->>>>>>> refs/remotes/origin/lavega
-
-  }
   create() {
-
     let character = this.sound.add('character',{
       volume: 0.3
     });
@@ -326,14 +376,6 @@ class ChooseCharacterScene extends Phaser.Scene {
 class ChooseItemScene extends Phaser.Scene {
   constructor() {
     super( { key: 'second' } );
-  }
-  preload() {
-<<<<<<< HEAD
-    //load images
-
-=======
-    
->>>>>>> refs/remotes/origin/lavega
   }
   create() {
     let coin = this.sound.add('coin',{
@@ -487,7 +529,7 @@ class ChooseItemScene extends Phaser.Scene {
           coin.play();
           chooseitem.stop();
           this.scene.restart();
-        } else { 
+        } else {
           nenough.play();
         }
 
@@ -630,7 +672,6 @@ class ChooseItemScene extends Phaser.Scene {
 
 }
 
-
 class FightScene extends Phaser.Scene {
   constructor() {
     super({ key: 'third' });
@@ -641,22 +682,14 @@ class FightScene extends Phaser.Scene {
     this.turn = 'p';
   }
 
-  preload() {
-<<<<<<< HEAD
-
-=======
->>>>>>> refs/remotes/origin/lavega
-
-  }
-
   create() {
-    //create container
 
     let bgm = this.sound.add('fight',{
       volume: 0.5
     });
     bgm.play({loop:true});
 
+    //create container
     let playerBox = this.add.container(gameWidth/2,gameHeight*0.95).setSize(gameWidth,gameHeight*0.1);
     //view status
     if(player.T_HP){
@@ -1091,15 +1124,16 @@ class FightScene extends Phaser.Scene {
       let imgBg = this.add.image(0, 0, 'bg_gameover').setDisplaySize(container.width,container.height);
       let txtScore = this.add.text(0, container.height*0.1, "< "+stage+" - "+small_stage+" >", { fontSize: container.height*0.06, fontStyle: 'bold', fill: '#000' , fontFamily:'font1'});
       txtScore.x = -txtScore.width/2;
-      let txtCoin = this.add.text(0, txtScore.y+txtScore.height, ""+level, { fontSize: container.height*0.06, fontStyle: 'bold', fill: '#000' , fontFamily:'font1'}).setPadding({ top: txtScore.height/2 });
+      let txtCoin = this.add.text(0, txtScore.y+txtScore.height, ""+level, { fontSize: container.height*0.06, fontStyle: 'bold', fill: '#000' , fontFamily:'font1'}).setPadding({ top: txtScore.height*0.2 });
       let imgCoin = this.add.image(0, txtCoin.y+txtCoin.height/2, 'nav_coin').setDisplaySize(txtCoin.height*1.5, txtCoin.height);
       txtCoin.x = -txtCoin.width/2 + imgCoin.displayWidth/2;
       imgCoin.x = txtCoin.x - imgCoin.displayWidth/2;
-      let btnReplay = this.add.image(-container.width*0.23, container.height*0.35, 'button').setDisplaySize(container.width*0.4,container.width*0.2).setInteractive();
+
+      let btnReplay = this.add.image(-container.width*0.23, container.height*0.37, 'button').setDisplaySize(container.width*0.4,container.width*0.2).setInteractive();
       let txtReplay = this.add.text(0, 0, '다시시작', { fontSize: btnReplay.displayHeight/3, fontStyle: 'bold' , fontFamily:'font1'});
       txtReplay.x = btnReplay.x - txtReplay.width/2;
       txtReplay.y = btnReplay.y - txtReplay.height/2;
-      let btnExit = this.add.image(container.width*0.23, container.height*0.35, 'button').setDisplaySize(container.width*0.4,container.width*0.2).setInteractive();
+      let btnExit = this.add.image(container.width*0.23, container.height*0.37, 'button').setDisplaySize(container.width*0.4,container.width*0.2).setInteractive();
       let txtExit = this.add.text(0, 0, '게임종료', { fontSize: btnExit.displayHeight/3, fontStyle: 'bold' , fontFamily:'font1'});
       txtExit.x = btnExit.x - txtExit.width/2;
       txtExit.y = btnExit.y - txtExit.height/2;
