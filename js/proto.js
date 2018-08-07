@@ -169,7 +169,6 @@ class IntroScene extends Phaser.Scene {
     this.load.audio('bell',['sound/bell.wav']);
     this.load.audio('chooseitem',['sound/chooseitem.wav']);
     this.load.audio('coin',['sound/coin.wav']);
-    this.load.audio('nenough',['sound/nenough.wav']);
     this.load.audio('pattack',['sound/pattack.wav']);
     this.load.audio('mattack1',['sound/mattack1.wav']);
     this.load.audio('mattack2',['sound/mattack2.wav']);
