@@ -104,7 +104,7 @@ class IntroScene extends Phaser.Scene {
 
     this.load.image('bg','img/bg_intro.png');
     this.load.image('title','img/title.png');
-    for (let i=1; i<5; i++) { this.load.image('how'+i,'img/howto/'+i+'.png'); }
+    for (let i=1; i<5; i++) { this.load.image('how'+i,'img/howTo/'+i+'.png'); }
     this.load.image('exit','img/exit.png');
     this.load.image('button','img/button.png');
     this.load.image('UI','img/status.png');
